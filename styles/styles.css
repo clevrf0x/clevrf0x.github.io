@@ -280,10 +280,10 @@ section {
 .about-stats .progress-bars .progress-bar .progress-con .progress .js {
   width: 30%;
 }
-.about-stats .progress-bars .progress-bar .progress-con .progress .bootstrap {
+.about-stats .progress-bars .progress-bar .progress-con .progress .jquery {
   width: 65%;
 }
-.about-stats .progress-bars .progress-bar .progress-con .progress .java {
+.about-stats .progress-bars .progress-bar .progress-con .progress .bootstrap {
   width: 50%;
 }
 .about-stats .progress-bars .progress-bar .progress-con .progress .python {

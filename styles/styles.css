@@ -271,24 +271,34 @@ section {
   transition: all 0.4s ease-in-out;
   width: 60%;
 }
-.about-stats .progress-bars .progress-bar .progress-con .progress .html {
-  width: 90%;
-}
-.about-stats .progress-bars .progress-bar .progress-con .progress .css {
+.about-stats .progress-bars .progress-bar .progress-con .progress .django {
   width: 70%;
 }
+.about-stats .progress-bars .progress-bar .progress-con .progress .front-end {
+  width: 80%;
+}
 .about-stats .progress-bars .progress-bar .progress-con .progress .js {
-  width: 30%;
+  width: 70%;
 }
-.about-stats .progress-bars .progress-bar .progress-con .progress .jquery {
-  width: 65%;
+.about-stats .progress-bars .progress-bar .progress-con .progress .postgresql {
+  width: 70%;
 }
-.about-stats .progress-bars .progress-bar .progress-con .progress .bootstrap {
-  width: 50%;
+.about-stats .progress-bars .progress-bar .progress-con .progress .design{
+  width: 80%;
 }
 .about-stats .progress-bars .progress-bar .progress-con .progress .python {
+  width: 80%;
+}
+.about-stats .progress-bars .progress-bar .progress-con .progress .react {
   width: 60%;
 }
+.about-stats .progress-bars .progress-bar .progress-con .progress .linux {
+  width: 85%;
+}
+.about-stats .progress-bars .progress-bar .progress-con .progress .cloud {
+  width: 60%;
+}
+
 
 .stat-title {
   text-transform: uppercase;

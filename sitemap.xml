@@ -2,45 +2,45 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://favasm.dev/categories/</loc>
+    <loc>https://favas.tech/categories/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/cheatsheet/</loc>
+    <loc>https://favas.tech/tags/cheatsheet/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/categories/cheatsheets/</loc>
+    <loc>https://favas.tech/categories/cheatsheets/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/dart/</loc>
+    <loc>https://favas.tech/tags/dart/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/posts/dart-cheat-sheet/</loc>
+    <loc>https://favas.tech/posts/dart-cheat-sheet/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/development/</loc>
+    <loc>https://favas.tech/tags/development/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/</loc>
+    <loc>https://favas.tech/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/flutter/</loc>
+    <loc>https://favas.tech/tags/flutter/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/posts/</loc>
+    <loc>https://favas.tech/posts/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/programming/</loc>
+    <loc>https://favas.tech/tags/programming/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/tags/</loc>
+    <loc>https://favas.tech/tags/</loc>
     <lastmod>2023-03-15T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://favasm.dev/about/</loc>
+    <loc>https://favas.tech/about/</loc>
   </url><url>
-    <loc>https://favasm.dev/archive/</loc>
+    <loc>https://favas.tech/archive/</loc>
   </url><url>
-    <loc>https://favasm.dev/projects/</loc>
+    <loc>https://favas.tech/projects/</loc>
   </url><url>
-    <loc>https://favasm.dev/search/</loc>
+    <loc>https://favas.tech/search/</loc>
   </url>
 </urlset>

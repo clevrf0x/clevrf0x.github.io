@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Favas M</title>
+    <link>https://favasm.dev/</link>
+    <description>Recent content on Favas M</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 15 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://favasm.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dart Cheatsheet</title>
+      <link>https://favasm.dev/posts/dart-cheat-sheet/</link>
+      <pubDate>Wed, 15 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://favasm.dev/posts/dart-cheat-sheet/</guid>
+      <description>A extensive cheatsheet for dart programming language who are new to programming and/or learning flutter framework.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://favasm.dev/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://favasm.dev/about/</guid>
+      <description>Hi 👋, I&amp;rsquo;m Favas M =========================
+🌱 I’m currently learning Golang 👨‍💻 All of my projects are available at here 💬 Ask me about cybersecurity, programming, games 📫 How to reach me favasm72@gmail.com Github Stats: My Badges ⏰ WakaTime Stats </description>
+    </item>
+    
+    
+    <item>
+      <title>Projects</title>
+      <link>https://favasm.dev/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://favasm.dev/projects/</guid>
+      <description>Nothing to see here, yet.</description>
+    </item>
+    
+    
+  </channel>
+</rss>

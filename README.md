@@ -1,1 +1,1 @@
-https://favas.tech
+https://favasm.tech

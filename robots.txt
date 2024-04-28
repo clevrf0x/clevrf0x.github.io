@@ -1,3 +1,3 @@
 User-agent: *
 Disallow:
-Sitemap: https://favas.tech/sitemap.xml
+Sitemap: https://favasm.tech/sitemap.xml

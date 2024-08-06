@@ -36,6 +36,31 @@
   text-decoration: underline;
 }
 
+.profile-image {
+  width: 100px;
+  height: 100px;
+  background-color: #cccccc;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  -webkit-filter: grayscale(100%);
+  /* Safari 6.0 - 9.0 */
+  filter: grayscale(100%);
+}
+
+.social-icons {
+  display: flex;
+  justify-content: flex-start;
+  margin: 20px 0;
+}
+
+.social-icon {
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
 .tail {
   margin-top: 20px;
 }

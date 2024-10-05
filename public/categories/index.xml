@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Favas M</title>
+    <link>http://localhost:1313/categories/</link>
+    <description>Recent content in Categories on Favas M</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 05 Oct 2024 16:25:54 +0530</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CTF</title>
+      <link>http://localhost:1313/categories/ctf/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/ctf/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Ghidra</title>
+      <link>http://localhost:1313/categories/ghidra/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/ghidra/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Hacking</title>
+      <link>http://localhost:1313/categories/hacking/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/hacking/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>HackTheBox</title>
+      <link>http://localhost:1313/categories/hackthebox/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/hackthebox/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Reversing</title>
+      <link>http://localhost:1313/categories/reversing/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/reversing/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Golang</title>
+      <link>http://localhost:1313/categories/golang/</link>
+      <pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/golang/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Multi-Tenancy</title>
+      <link>http://localhost:1313/categories/multi-tenancy/</link>
+      <pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/multi-tenancy/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Programming</title>
+      <link>http://localhost:1313/categories/programming/</link>
+      <pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/programming/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>SaaS</title>
+      <link>http://localhost:1313/categories/saas/</link>
+      <pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/saas/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+    <item>
+      <title>Dart</title>
+      <link>http://localhost:1313/categories/dart/</link>
+      <pubDate>Wed, 05 Oct 2022 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/categories/dart/</guid>
+      <description></description>
+      <content></content>
+    </item>
+    
+  </channel>
+</rss>

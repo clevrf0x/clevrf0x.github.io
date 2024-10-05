@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ghidra on Favas M</title>
+    <link>http://localhost:1313/tags/ghidra/</link>
+    <description>Recent content in Ghidra on Favas M</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 05 Oct 2024 16:25:54 +0530</lastBuildDate><atom:link href="http://localhost:1313/tags/ghidra/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Simple Encryptor Walkthrough - HackTheBox</title>
+      <link>http://localhost:1313/blogs/hackthebox/challenges/reversing/simple-encryptor/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/blogs/hackthebox/challenges/reversing/simple-encryptor/</guid>
+      <description>&lt;h1 id=&#34;clevrf0x&#34;&gt;clevrf0x&lt;/h1&gt;
+&lt;h2 id=&#34;-simple-encryptor-walkthrough---htb&#34;&gt;$ Simple Encryptor Walkthrough - HTB&lt;/h2&gt;
+&lt;p&gt;Hello, and welcome! In this article, I’ll walk you through solving the &amp;ldquo;Simple Encryptor&amp;rdquo; reversing challenge from the platform &lt;a href=&#34;https://hackthebox.eu&#34;&gt;HackTheBox&lt;/a&gt;. Since I haven’t done much in the realm of CTF or any kind of cybersecurity challenges for a while, my approach might not be perfect, and there may be some incorrect assumptions along the way. If you notice anything off, feel free to reach out, and I’ll be happy to correct it.&lt;/p&gt;</description>
+      <content>&lt;h1 id=&#34;clevrf0x&#34;&gt;clevrf0x&lt;/h1&gt;
+&lt;h2 id=&#34;-simple-encryptor-walkthrough---htb&#34;&gt;$ Simple Encryptor Walkthrough - HTB&lt;/h2&gt;
+&lt;p&gt;Hello, and welcome! In this article, I’ll walk you through solving the &amp;ldquo;Simple Encryptor&amp;rdquo; reversing challenge from the platform &lt;a href=&#34;https://hackthebox.eu&#34;&gt;HackTheBox&lt;/a&gt;. Since I haven’t done much in the realm of CTF or any kind of cybersecurity challenges for a while, my approach might not be perfect, and there may be some incorrect assumptions along the way. If you notice anything off, feel free to reach out, and I’ll be happy to correct it.&lt;/p&gt;
+&lt;p&gt;Please keep in mind that I’m primarily a developer with no formal experience in reverse engineering or tools like &lt;code&gt;Ghidra&lt;/code&gt; or &lt;code&gt;IDA Pro&lt;/code&gt;, and my understanding of assembly is quite limited.&lt;/p&gt;
+&lt;h3 id=&#34;challenge-information&#34;&gt;Challenge Information&lt;/h3&gt;
+&lt;p&gt;Now that we&amp;rsquo;ve set the stage, let&amp;rsquo;s dive into the challenge itself. The description provided is as follows:&lt;/p&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>

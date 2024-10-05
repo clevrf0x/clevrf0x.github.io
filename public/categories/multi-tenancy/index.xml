@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Multi-Tenancy on Favas M</title>
+    <link>http://localhost:1313/categories/multi-tenancy/</link>
+    <description>Recent content in Multi-Tenancy on Favas M</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 21 Sep 2024 16:25:54 +0530</lastBuildDate><atom:link href="http://localhost:1313/categories/multi-tenancy/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Multitenancy Using Golang (WIP)</title>
+      <link>http://localhost:1313/blogs/programming/multitenancy_in_golang/</link>
+      <pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/blogs/programming/multitenancy_in_golang/</guid>
+      <description>&lt;p&gt;Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p&gt;</description>
+      <content>&lt;p&gt;Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p&gt;
+&lt;p&gt;Keep in mind that I haven&amp;rsquo;t tested this system in a high-traffic production environment, so it may have performance limitations. Please adapt the approach to your specific needs and use cases.&lt;/p&gt;
+&lt;h3 id=&#34;tldr&#34;&gt;TL;DR:&lt;/h3&gt;
+&lt;p&gt;This post shares my experience building a multi-tenant system in Golang. The example code is meant to illustrate the concept and might have unhandled exceptions or security vulnerabilities. Make sure to thoroughly review and test the code before deploying it in a production environment.&lt;/p&gt;
+&lt;h3 id=&#34;what-is-multi-tenancy&#34;&gt;What is Multi-Tenancy&lt;/h3&gt;
+&lt;p&gt;Before we explore how to build a multi-tenant system, let&amp;rsquo;s clarify what multi-tenancy is. According to Wikipedia, &amp;ldquo;Multitenancy is a software architecture where a single instance of an application serves multiple users or organizations&amp;rdquo;, users are often referred to as &amp;rsquo;tenants.&#39;&lt;/p&gt;
+&lt;p&gt;But what does that mean? Imagine you have a product with two users who both need identical environments but require their data to be completely isolated. In the past, the solution was to host two separate instances of the application, either on-premises or in the cloud. However, this approach has several downsides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It becomes expensive to spin up new servers for every user.&lt;/li&gt;
+&lt;li&gt;Managing separate instances becomes difficult as the user base grows. For example, managing 100 instances for 100 customers can be a huge headache.&lt;/li&gt;
+&lt;li&gt;Different instances might run different versions of the app, leading to inconsistency.&lt;/li&gt;
+&lt;li&gt;Handling database migrations across multiple environments can become a major challenge.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;Single Tenant Application Architecture&#34; src=&#34;http://localhost:1313/assets/blogs/multi-tenancy-using-golang/single-tenant-architecture.png&#34;&gt;
+&lt;em&gt;Single Tenant Application Architecture&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;What&amp;rsquo;s the alternative? Instead of spinning up separate instances, we could host a single instance of the application where every tenant can interact with it, while still keeping their data isolated. This is where multi-tenancy comes in.&lt;/p&gt;
+&lt;p&gt;Using a multi-tenant architecture allows us to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Roll out version updates and database migrations across all tenants simultaneously.&lt;/li&gt;
+&lt;li&gt;Reduce operational overhead by managing a single instance.&lt;/li&gt;
+&lt;li&gt;Lower infrastructure costs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;real-world-examples-of-multi-tenant-architecture&#34;&gt;Real-world Examples of Multi-Tenant Architecture&lt;/h3&gt;
+&lt;p&gt;Many popular SaaS products use multi-tenancy successfully. Here are a few examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Microsoft Office 365&lt;/li&gt;
+&lt;li&gt;GitHub&lt;/li&gt;
+&lt;li&gt;Twilio&lt;/li&gt;
+&lt;li&gt;Canva&lt;/li&gt;
+&lt;li&gt;Atlassian Products (e.g., Jira, Confluence)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt=&#34;Multi-Tenant Application Architecture&#34; src=&#34;http://localhost:1313/assets/blogs/multi-tenancy-using-golang/multi-tenant-architecture.png&#34;&gt;
+&lt;em&gt;Multi-Tenant Application Architecture&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;how-to-achieve-data-isolation-in-multi-tenancy&#34;&gt;How to Achieve Data Isolation in Multi-Tenancy&lt;/h3&gt;
+&lt;p&gt;Now that we understand what multi-tenancy is, let&amp;rsquo;s explore how to implement it in a way that ensures data isolation between tenants. There are primarily three methods for achieving this, each with its own pros and cons:&lt;/p&gt;
+&lt;h4 id=&#34;1-database-level-isolation&#34;&gt;1. Database-Level Isolation&lt;/h4&gt;
+&lt;p&gt;In database-level isolation, each tenant&amp;rsquo;s data is stored in a separate database. A shared public database is used for common data.&lt;/p&gt;
+&lt;h5 id=&#34;pros&#34;&gt;Pros:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Each tenant&amp;rsquo;s data is completely isolated in a separate database.&lt;/li&gt;
+&lt;li&gt;Low risk of accidentally accessing cross-tenant data.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;cons&#34;&gt;Cons:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Tenants cannot have foreign key relationships between their data and the shared public database.&lt;/li&gt;
+&lt;li&gt;Switching between tenant databases and the public database adds performance overhead. This can be mitigated by injecting separate database sessions into your handlers.&lt;/li&gt;
+&lt;li&gt;It&amp;rsquo;s complex to implement and maintain.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;2-schema-level-isolation&#34;&gt;2. Schema-Level Isolation&lt;/h4&gt;
+&lt;p&gt;In schema-level isolation, all tenants share the same database, but their data is separated into individual schemas. A shared public schema is used for common data.&lt;/p&gt;
+&lt;h5 id=&#34;pros-1&#34;&gt;Pros:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Data is isolated at the schema level, similar to database-level isolation.&lt;/li&gt;
+&lt;li&gt;No significant performance overhead when switching between public and tenant schemas.&lt;/li&gt;
+&lt;li&gt;Reduced complexity compared to database-level isolation.&lt;/li&gt;
+&lt;li&gt;Reusing the same database connection for both tenant and public data is easier to implement.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;cons-1&#34;&gt;Cons:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Less strict data isolation compared to database-level isolation.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;3-row-level-isolation&#34;&gt;3. Row-Level Isolation&lt;/h4&gt;
+&lt;p&gt;In row-level isolation, each tenant&amp;rsquo;s data is stored in the same tables, but a &amp;ldquo;tenant ID&amp;rdquo; column is added to differentiate records by tenant.&lt;/p&gt;
+&lt;h5 id=&#34;pros-2&#34;&gt;Pros:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Simple to implement and maintain.&lt;/li&gt;
+&lt;li&gt;Easy to apply database migrations.&lt;/li&gt;
+&lt;li&gt;Foreign key relationships between tables can be maintained as needed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h5 id=&#34;cons-2&#34;&gt;Cons:&lt;/h5&gt;
+&lt;ul&gt;
+&lt;li&gt;Data is less isolated compared to database or schema-level isolation.&lt;/li&gt;
+&lt;li&gt;There&amp;rsquo;s a higher risk of accidental cross-tenant data access through query errors.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;other-methods&#34;&gt;Other Methods&lt;/h4&gt;
+&lt;p&gt;There are additional methods, such as creating prefixed tables for each tenant (e.g., &lt;code&gt;tenant1_users&lt;/code&gt;, &lt;code&gt;tenant2_users&lt;/code&gt;). However, this approach is less common because it complicates database migrations and increases maintenance efforts.&lt;/p&gt;
+&lt;h3 id=&#34;how-to-implement-multi-tenancy&#34;&gt;How to Implement Multi-Tenancy&lt;/h3&gt;
+&lt;p&gt;For this blog post, we will be implementing schema-level isolation. After weighing the pros and cons of each approach, I believe schema-level isolation provides a balanced trade-off between complexity and data isolation, making it a good choice for this demonstration.&lt;/p&gt;
+&lt;p&gt;To keep this project as a proof of concept, we&amp;rsquo;ll use a minimal set of dependencies. Here&amp;rsquo;s the stack we&amp;rsquo;ll be working with:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Routing:&lt;/strong&gt; We&amp;rsquo;ll use the Chi library for routing. It&amp;rsquo;s lightweight, easy to use, and simplifies middleware implementation, making the codebase more manageable.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Database Interaction:&lt;/strong&gt; For database queries, we&amp;rsquo;ll use &lt;code&gt;sqlc&lt;/code&gt; to generate Go code, ensuring type safety with minimal boilerplate.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Migrations:&lt;/strong&gt; Goose will handle our database migrations, allowing for smooth updates to the database schema as new tenants are added.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Database:&lt;/strong&gt; We&amp;rsquo;ll use PostgreSQL, which natively supports schema-level isolation, making it the ideal choice for this project.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With these tools, we&amp;rsquo;ll go step-by-step through setting up multi-tenancy using schema-level isolation.&lt;/p&gt;
+&lt;h3 id=&#34;project-structure&#34;&gt;Project Structure&lt;/h3&gt;
+&lt;p&gt;Now this project structure will seem a bit redundant or strange for some of the Go developers. This is how I generally build projects in Golang. Since this is not a blog about how to build API servers in Golang, I will not dwell deep into the structure; I will explain as much as I can of each package and file&amp;rsquo;s purposes as we progress.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        .
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── api
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   ├── middlewares
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   ├── middlewares.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   └── router.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── cmd
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   ├── app
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   │   └── main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   └── migrate
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │       ├── helpers.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │       └── main.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── db
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   ├── migrations
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   │   ├── shared
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   │   │   └── 00001_init_db.sql
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   │   └── tenant
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   │       └── 00001_init_db.sql
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   └── queries
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │       ├── shared
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │       │   └── tenant.sql
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │       └── tenant
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │           └── user.sql
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── docker-compose.yml
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── .env
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── .env.example
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── .gitignore
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── go.mod
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── Makefile
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── pkg
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   └── helpers
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        ├── server
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        │   └── server.go
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        └── sqlc.yml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;</content>
+    </item>
+    
+  </channel>
+</rss>

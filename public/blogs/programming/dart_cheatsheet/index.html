@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  
+    <title>Dart Cheatsheet :: Favas M</title>
+  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="This cheatsheet provides a comprehensive overview of the Dart programming language, covering essential syntax, data structures, and core features." />
+<meta name="keywords" content="dart, programming, cheatsheet" />
+
+  <meta name="robots" content="noodp" />
+
+<link rel="canonical" href="http://localhost:1313/blogs/programming/dart_cheatsheet/" />
+
+
+
+
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/buttons.min.2bc533403a27dfe0e93105a92502b42ce4587e2e4a87d9f7d349e51e16e09478.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/code.min.00125962708925857e7b66dbc58391d55be1191a3d0ce2034de8c9cd2c481c36.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/fonts.min.90c955c31dd7c0e05aae3d4f583d4d8a2af799d69c961337eaf2a825063a55dd.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/footer.min.2e3eb191baee58dd05a9f0104ac1fab0827bca7c64dafe0b2579f934c33a1d69.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/gist.min.a751e8b0abe1ba8bc53ced52a38b19d8950fe78ca29454ea8c2595cf26aad5c0.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/header.min.b6fb4423cf82a9f9d7abc9cd010223fa3d70a6526a3f28f8e17d814c06e18f9e.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/main.min.1d8be2dd1b5de9fdaed058c8c59fcf4485f36619574abfb47ed0cfda4812c16d.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/menu.min.83637a90d903026bc280d3f82f96ceb06c5fc72b7c1a8d686afb5bbf818a29f7.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/pagination.min.82f6400eae7c7c6dc3c866733c2ec0579e4089608fea69400ff85b3880aa0d3c.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/post.min.fc74ca360273c1d828da3c02b8174eba435607b369d98418ccc6f2243cd4e75d.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/prism.min.9023bbc24533d09e97a51a0a42a5a7bfe4c591ae167c5551fb1d2191d11977c0.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/syntax.min.cc789ed9377260d7949ea4c18781fc58959a89287210fe4edbff44ebfc1511b6.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/terminal.min.736caf886baa67df630c4cde30fbdc5115122eb74c6246f15a31401344bfa2f0.css">
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/terms.min.b81791663c3790e738e571cdbf802312390d30e4b1d8dc9d814a5b5454d0ac11.css">
+
+
+<link rel="stylesheet" href="http://localhost:1313/terminal.css">
+
+
+
+
+<link rel="shortcut icon" href="http://localhost:1313/favicon.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+
+
+<meta name="twitter:card" content="summary" />
+
+  
+    <meta name="twitter:site" content="" />
+  
+    <meta name="twitter:creator" content="clevrf0x" />
+
+
+
+<meta property="og:locale" content="en" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Dart Cheatsheet">
+<meta property="og:description" content="This cheatsheet provides a comprehensive overview of the Dart programming language, covering essential syntax, data structures, and core features." />
+<meta property="og:url" content="http://localhost:1313/blogs/programming/dart_cheatsheet/" />
+<meta property="og:site_name" content="Favas M" />
+
+  <meta property="og:image" content="http://localhost:1313/og-image.png">
+
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+
+  <meta property="article:section" content="Programming" />
+
+  <meta property="article:section" content="Dart" />
+
+
+  <meta property="article:published_time" content="2022-10-05 16:25:54 &#43;0530 IST" />
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+<div class="container center">
+
+  <header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      <a href="/">
+  <div class="logo">
+    clevrf0x
+  </div>
+</a>
+
+    </div>
+    
+      <ul class="menu menu--mobile">
+  <li class="menu__trigger">Menu&nbsp;▾</li>
+  <li>
+    <ul class="menu__dropdown">
+      
+        
+          <li><a href="/about">About</a></li>
+        
+      
+        
+          <li><a href="/blogs">Blogs</a></li>
+        
+      
+        
+          <li><a href="/contact">Contact</a></li>
+        
+      
+      
+    </ul>
+  </li>
+</ul>
+
+    
+    
+  </div>
+  
+    <nav class="navigation-menu">
+  <ul class="navigation-menu__inner menu--desktop">
+    
+      
+        
+          <li><a href="/about" >About</a></li>
+        
+      
+        
+          <li><a href="/blogs" >Blogs</a></li>
+        
+      
+        
+          <li><a href="/contact" >Contact</a></li>
+        
+      
+      
+    
+  </ul>
+</nav>
+
+  
+</header>
+
+
+  <div class="content">
+    
+<article class="post">
+  <h1 class="post-title">
+    <a href="http://localhost:1313/blogs/programming/dart_cheatsheet/">Dart Cheatsheet</a>
+  </h1>
+  <div class="post-meta"><time class="post-date">2022-10-05</time><span class="post-author">Favas M</span></div>
+
+  
+    <span class="post-tags">
+      
+      #<a href="http://localhost:1313/tags/dart/">dart</a>&nbsp;
+      
+      #<a href="http://localhost:1313/tags/coding/">coding</a>&nbsp;
+      
+      #<a href="http://localhost:1313/tags/reference/">reference</a>&nbsp;
+      
+    </span>
+  
+  
+
+
+  
+
+  <div class="post-content"><div>
+        <h2 id="basic-program">Basic Program<a href="#basic-program" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In Dart Programming Language, main() function is the entry point for all function.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Hello World&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="variables-and-data-types">Variables and Data Types<a href="#variables-and-data-types" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<blockquote>
+<p>If a variable is being initialized during declaration, it is considered better practice to use the var keyword instead of explicitly typing the variable. However, if a variable is not being initialized during declaration, giving it an explicit type is considered good practice.</p>
+</blockquote>
+<h3 id="final-vs-const">final vs const<a href="#final-vs-const" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, final and const are used for declaring immutable variables.</p>
+<p>The differences between final and const are:</p>
+<p>final variables can be set once and their value is evaluated at runtime.
+const variables are evaluated at compile-time and are immutable throughout the program&rsquo;s execution.
+const can only be used with values that are known at compile-time, while final can be used with values that are determined at runtime.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Numbers
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">double</span> height <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.75</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">num</span> weight <span style="color:#f92672">=</span> <span style="color:#ae81ff">68.5</span>; <span style="color:#75715e">// both int and double will be valid
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;Age: </span><span style="color:#e6db74">$</span>age<span style="color:#e6db74">, Height: </span><span style="color:#e6db74">$</span>height<span style="color:#e6db74">, Weight: </span><span style="color:#e6db74">$</span>weight<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Strings
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">String</span> name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Alice&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">String</span> message <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Hello, </span><span style="color:#e6db74">$</span>name<span style="color:#e6db74">!&#39;</span>;
+</span></span><span style="display:flex;"><span>  print(message);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Booleans
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">bool</span> isRaining <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">bool</span> isSunny <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Is it raining? </span><span style="color:#e6db74">$</span>isRaining<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Is it sunny? </span><span style="color:#e6db74">$</span>isSunny<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Dynamic (no fixed type, any value can be assigned)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">dynamic</span> value <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Value: </span><span style="color:#e6db74">$</span>value<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  value <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;hello&#39;</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Value: </span><span style="color:#e6db74">$</span>value<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Object
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">Object</span> obj <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;hello&#39;</span>;
+</span></span><span style="display:flex;"><span>  print(obj.runtimeType);
+</span></span><span style="display:flex;"><span>  obj <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>;
+</span></span><span style="display:flex;"><span>  print(obj.runtimeType);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Final (value can change during runtime)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">final</span> DateTime now <span style="color:#f92672">=</span> DateTime.now();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Const (compile time constant)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">String</span> homePlanet <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Earth&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">int</span> daysInWeek <span style="color:#f92672">=</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Home planet: </span><span style="color:#e6db74">$</span>homePlanet<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Days in week: </span><span style="color:#e6db74">$</span>daysInWeek<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Var (automatically type inferred)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> isWindy <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> temperature <span style="color:#f92672">=</span> <span style="color:#ae81ff">25.0</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Is it windy? </span><span style="color:#e6db74">$</span>isWindy<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;Temperature: </span><span style="color:#e6db74">$</span>temperature<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="collections">Collections<a href="#collections" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<h3 id="map">Map<a href="#map" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li>Stores data as key-value pairs</li>
+<li>Each key in the map must be unique</li>
+<li>Can be created with or without type annotations</li>
+<li>Accessed using keys</li>
+<li>Supports operations such as adding and removing key-value pairs</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Map: The Map object is a key and value pair.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Keys and values on a map may be of any type. It is a dynamic collection.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Creating a map with type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  Map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">String</span>, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> ages <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Alice&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">30</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Bob&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">25</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Charlie&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">35</span>,
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  print(ages); <span style="color:#75715e">// {&#34;Alice&#34;: 30, &#34;Bob&#34;: 25, &#34;Charlie&#34;: 35}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Creating a map without type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> salaries <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Alice&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">50000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Bob&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">60000</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#39;Charlie&#39;</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">70000</span>,
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>  print(salaries); <span style="color:#75715e">// {&#34;Alice&#34;: 50000, &#34;Bob&#34;: 60000, &#34;Charlie&#34;: 70000}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Accessing a value by key
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(ages[<span style="color:#e6db74">&#39;Alice&#39;</span>]); <span style="color:#75715e">// 30
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(salaries[<span style="color:#e6db74">&#39;Bob&#39;</span>]); <span style="color:#75715e">// 60000
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Adding a key-value pair to the map
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  ages[<span style="color:#e6db74">&#39;David&#39;</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">40</span>;
+</span></span><span style="display:flex;"><span>  print(ages); <span style="color:#75715e">// {&#34;Alice&#34;: 30, &#34;Bob&#34;: 25, &#34;Charlie&#34;: 35, &#34;David&#34;: 40}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Removing a key-value pair from the map
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  salaries.remove(<span style="color:#e6db74">&#39;Charlie&#39;</span>);
+</span></span><span style="display:flex;"><span>  print(salaries); <span style="color:#75715e">// {&#34;Alice&#34;: 50000, &#34;Bob&#34;: 60000}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Checking if a map contains a key
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(ages.containsKey(<span style="color:#e6db74">&#39;Alice&#39;</span>)); <span style="color:#75715e">// true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(salaries.containsKey(<span style="color:#e6db74">&#39;Charlie&#39;</span>)); <span style="color:#75715e">// false
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Iterating over a map using a for loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> entry <span style="color:#66d9ef">in</span> ages.entries) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">${</span>entry.key<span style="color:#e6db74">}</span><span style="color:#e6db74">: </span><span style="color:#e6db74">${</span>entry.value<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;Alice: 30&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;Bob: 25&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;Charlie: 35&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;David: 40&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Iterating over a map using forEach() method
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  salaries.forEach((key, value) <span style="color:#f92672">=&gt;</span> print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">$</span>key<span style="color:#e6db74"> earns </span><span style="color:#e6db74">$</span>value<span style="color:#e6db74"> dollars&#39;</span>));
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;Alice earns 50000 dollars&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;Bob earns 60000 dollars&#34;
+</span></span></span></code></pre></div><h3 id="list">List<a href="#list" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li>Stores data as an ordered collection of elements</li>
+<li>Elements can be of any data type</li>
+<li>Can be created with or without type annotations</li>
+<li>Accessed using index values</li>
+<li>Supports operations such as adding and removing elements</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// List: List data type is similar to arrays.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// A list is used to represent a collection of objects.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// It is an ordered group of objects.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Creating a list with type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">String</span><span style="color:#f92672">&gt;</span> fruits <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;apple&#34;</span>, <span style="color:#e6db74">&#34;banana&#34;</span>, <span style="color:#e6db74">&#34;orange&#34;</span>];
+</span></span><span style="display:flex;"><span>  print(fruits); <span style="color:#75715e">// [&#34;apple&#34;, &#34;banana&#34;, &#34;orange&#34;]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Creating a list without type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> vegetables <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;carrot&#34;</span>, <span style="color:#e6db74">&#34;spinach&#34;</span>, <span style="color:#e6db74">&#34;broccoli&#34;</span>];
+</span></span><span style="display:flex;"><span>  print(vegetables); <span style="color:#75715e">// [&#34;carrot&#34;, &#34;spinach&#34;, &#34;broccoli&#34;]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Adding an element to the list
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  fruits.add(<span style="color:#e6db74">&#34;grape&#34;</span>);
+</span></span><span style="display:flex;"><span>  print(fruits); <span style="color:#75715e">// [&#34;apple&#34;, &#34;banana&#34;, &#34;orange&#34;, &#34;grape&#34;]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Removing an element from the list
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  vegetables.remove(<span style="color:#e6db74">&#34;spinach&#34;</span>);
+</span></span><span style="display:flex;"><span>  print(vegetables); <span style="color:#75715e">// [&#34;carrot&#34;, &#34;broccoli&#34;]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Accessing an element in the list
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(fruits[<span style="color:#ae81ff">0</span>]); <span style="color:#75715e">// &#34;apple&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(vegetables[<span style="color:#ae81ff">1</span>]); <span style="color:#75715e">// &#34;broccoli&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Checking if a list contains a value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(fruits.contains(<span style="color:#e6db74">&#34;apple&#34;</span>)); <span style="color:#75715e">// true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(vegetables.contains(<span style="color:#e6db74">&#34;spinach&#34;</span>)); <span style="color:#75715e">// false
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Iterating over a list using a for loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> fruit <span style="color:#66d9ef">in</span> fruits) {
+</span></span><span style="display:flex;"><span>    print(fruit);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;apple&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;banana&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;orange&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;grape&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Iterating over a list using forEach() method
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  vegetables.forEach((vegetable) <span style="color:#f92672">=&gt;</span> print(vegetable));
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;carrot&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// &#34;broccoli&#34;
+</span></span></span></code></pre></div><h3 id="set">Set<a href="#set" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li>Stores data as an unordered collection of unique elements</li>
+<li>Elements can be of any data type</li>
+<li>Cannot contain duplicate elements</li>
+<li>Can be created with or without type annotations</li>
+<li>Supports operations such as adding and removing elements</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Using a Set with type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  Set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> mySet1 <span style="color:#f92672">=</span> {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>};
+</span></span><span style="display:flex;"><span>  print(mySet1); <span style="color:#75715e">// Output: {1, 2, 3}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Using a Set without type annotations
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> mySet2 <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;apple&#39;</span>, <span style="color:#e6db74">&#39;banana&#39;</span>, <span style="color:#e6db74">&#39;cherry&#39;</span>};
+</span></span><span style="display:flex;"><span>  print(mySet2); <span style="color:#75715e">// Output: {apple, banana, cherry}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Adding an element to a Set
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  mySet1.add(<span style="color:#ae81ff">4</span>);
+</span></span><span style="display:flex;"><span>  print(mySet1); <span style="color:#75715e">// Output: {1, 2, 3, 4}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Removing an element from a Set
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  mySet2.remove(<span style="color:#e6db74">&#39;banana&#39;</span>);
+</span></span><span style="display:flex;"><span>  print(mySet2); <span style="color:#75715e">// Output: {apple, cherry}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Iterating over a Set
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">var</span> element <span style="color:#66d9ef">in</span> mySet1) {
+</span></span><span style="display:flex;"><span>    print(element);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// 3
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// 4
+</span></span></span></code></pre></div><blockquote>
+<p>Overall, the choice between Map, List, and Set depends on the specific requirements of your application. Use a Map when you need to store data as key-value pairs and quickly look up values by their keys. Use a List when you need to store data in a specific order and access it by index values. Use a Set when you need to store a collection of unique elements and don&rsquo;t care about their order.</p>
+</blockquote>
+<h2 id="string-interpolation">String Interpolation<a href="#string-interpolation" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>String interpolation is similar to python formatted strings</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// can use single or double qoutes for String type
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> firstName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Nicola&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> lastName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Tesla&#34;</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#34;My name is </span><span style="color:#e6db74">${</span>firstName<span style="color:#e6db74">}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">${</span>lastName<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">//can embed variables in string with $
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">String</span> fullName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">$</span>firstName<span style="color:#e6db74"> </span><span style="color:#e6db74">$</span>lastName<span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">String</span> upperCase <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">${</span>firstName.toUpperCase()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>;
+</span></span><span style="display:flex;"><span>  print(upperCase); <span style="color:#75715e">//Print: NICOLA
+</span></span></span></code></pre></div><h2 id="comments">Comments<a href="#comments" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// This is a normal, one-line comment.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/// This is a documentation comment, used to document libraries,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">/// classes, and their members. Tools like IDEs and dartdoc treat
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">/// doc comments specially.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">/* Comments like these are also supported. */</span>
+</span></span></code></pre></div><h2 id="imports">Imports<a href="#imports" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Importing a library from a specific file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;my_library.dart&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Importing a library with a prefix
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;my_library.dart&#39;</span> <span style="color:#66d9ef">as</span> mylib;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Importing only specific parts of a library
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;my_library.dart&#39;</span> <span style="color:#66d9ef">show</span> MyClass, myFunction;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Importing everything except specific parts of a library
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;my_library.dart&#39;</span> <span style="color:#66d9ef">hide</span> MyClass;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Importing built-in Dart libraries
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;dart:math&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;dart:convert&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Importing libraries from external packages
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;package:test/test.dart&#39;</span>;
+</span></span></code></pre></div><h2 id="operators">Operators<a href="#operators" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Arithmetic Operators
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> a <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> b <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;a + b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">+</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Addition
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a - b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">-</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Subtraction
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a * b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">*</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Multiplication
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a / b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">/</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Division
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a ~/ b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">~/</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Integer Division
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a % b = </span><span style="color:#e6db74">${</span>a <span style="color:#f92672">%</span> b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Modulo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a++ = </span><span style="color:#e6db74">${</span>a<span style="color:#f92672">++</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Post-Increment
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;++b = </span><span style="color:#e6db74">${</span><span style="color:#f92672">++</span>b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Pre-Increment
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;a-- = </span><span style="color:#e6db74">${</span>a<span style="color:#f92672">--</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Post-Decrement
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;--b = </span><span style="color:#e6db74">${</span><span style="color:#f92672">--</span>b<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Pre-Decrement
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Equality Operators
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> x <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> y <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> z <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;x == y is </span><span style="color:#e6db74">${</span>x <span style="color:#f92672">==</span> y<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Equal to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;x != z is </span><span style="color:#e6db74">${</span>x <span style="color:#f92672">!=</span> z<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Not equal to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Relational Operators
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> p <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> q <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;p &gt; q is </span><span style="color:#e6db74">${</span>p <span style="color:#f92672">&gt;</span> q<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Greater than
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;p &lt; q is </span><span style="color:#e6db74">${</span>p <span style="color:#f92672">&lt;</span> q<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Less than
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;p &gt;= q is </span><span style="color:#e6db74">${</span>p <span style="color:#f92672">&gt;=</span> q<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Greater than or equal to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;p &lt;= q is </span><span style="color:#e6db74">${</span>p <span style="color:#f92672">&lt;=</span> q<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Less than or equal to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Logical Operators
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">bool</span> r <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">bool</span> s <span style="color:#f92672">=</span> <span style="color:#66d9ef">false</span>;
+</span></span><span style="display:flex;"><span>  print(<span style="color:#e6db74">&#39;r &amp;&amp; s is </span><span style="color:#e6db74">${</span>r <span style="color:#f92672">&amp;&amp;</span> s<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Logical AND
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;r || s is </span><span style="color:#e6db74">${</span>r <span style="color:#f92672">||</span> s<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Logical OR
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(<span style="color:#e6db74">&#39;!r is </span><span style="color:#e6db74">${</span><span style="color:#f92672">!</span>r<span style="color:#e6db74">}</span><span style="color:#e6db74">&#39;</span>);  <span style="color:#75715e">// Logical NOT
+</span></span></span></code></pre></div><h2 id="control-flows">Control Flows<a href="#control-flows" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<h3 id="conditionals">Conditionals<a href="#conditionals" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p><strong>If Statement</strong>
+This is used to execute a block of code only if a certain condition is met.</p>
+<p><strong>If-Else Ladder</strong>
+This is used to check multiple conditions in a series of if-else blocks.</p>
+<p><strong>Switch Statement</strong>
+This is used to evaluate a single expression against multiple possible values.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// If Statement
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> a <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (a <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">$</span>a<span style="color:#e6db74"> is positive&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// If-Else Ladder
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> b <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (b <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">$</span>b<span style="color:#e6db74"> is positive&#39;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (b <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">$</span>b<span style="color:#e6db74"> is negative&#39;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;</span><span style="color:#e6db74">$</span>b<span style="color:#e6db74"> is neither positive nor negative&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Switch Statement
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">String</span> color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;red&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">switch</span> (color) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#39;red&#39;</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;The color is red&#39;</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#39;green&#39;</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;The color is green&#39;</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">case</span> <span style="color:#e6db74">&#39;blue&#39;</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;The color is blue&#39;</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">break</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;The color is not recognized&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<h3 id="loops">Loops<a href="#loops" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ol>
+<li>
+<p><strong>for loop</strong></p>
+<ul>
+<li>A for loop is used to iterate over a range of values or a collection of elements. It has three parts: an initializer, a condition, and an updater. The loop runs as long as the condition is true, and the updater is executed after each iteration.</li>
+</ul>
+</li>
+<li>
+<p><strong>while loop</strong></p>
+<ul>
+<li>A while loop is used to repeatedly execute a block of code as long as a given condition is true. The condition is checked at the beginning of each iteration, and if it is false, the loop terminates.</li>
+</ul>
+</li>
+<li>
+<p><strong>do-while loop</strong></p>
+<ul>
+<li>A do-while loop is similar to a while loop, but the condition is checked at the end of each iteration instead of at the beginning. This means that the loop always executes at least once.</li>
+</ul>
+</li>
+<li>
+<p><strong>forEach loop</strong></p>
+<ul>
+<li>A forEach loop is used to iterate over the elements of a collection. It takes a function as an argument, and the function is executed for each element in the collection.</li>
+</ul>
+</li>
+<li>
+<p><strong>for-in loop</strong></p>
+<ul>
+<li>A for-in loop is used to iterate over the elements of a collection. It automatically iterates over each element in the collection, without the need for an index variable.</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// for loop (prints upto 5, including 5)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">5</span>; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;for loop iteration </span><span style="color:#e6db74">$</span>i<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// while loop (prints upto 5, including 5)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> (j <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">5</span>) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;while loop iteration </span><span style="color:#e6db74">$</span>j<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>    j<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// do-while loop (prints upto 6, including 6)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> k <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">do</span> {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;do-while loop iteration </span><span style="color:#e6db74">$</span>k<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>    k<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">while</span> (k <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">5</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// forEach loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">String</span><span style="color:#f92672">&gt;</span> fruits <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;apple&#39;</span>, <span style="color:#e6db74">&#39;banana&#39;</span>, <span style="color:#e6db74">&#39;orange&#39;</span>, <span style="color:#e6db74">&#39;kiwi&#39;</span>];
+</span></span><span style="display:flex;"><span>  fruits.forEach((fruit) <span style="color:#f92672">=&gt;</span> print(<span style="color:#e6db74">&#39;I like </span><span style="color:#e6db74">$</span>fruit<span style="color:#e6db74">&#39;</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// for-in loop
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">String</span><span style="color:#f92672">&gt;</span> fruits <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;apple&#39;</span>, <span style="color:#e6db74">&#39;banana&#39;</span>, <span style="color:#e6db74">&#39;orange&#39;</span>, <span style="color:#e6db74">&#39;kiwi&#39;</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">String</span> fruit <span style="color:#66d9ef">in</span> fruits) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;I like </span><span style="color:#e6db74">$</span>fruit<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="functions">Functions<a href="#functions" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In Dart, functions are first-class objects, which means that they can be treated like any other object, such as numbers or strings. This allows functions to be assigned to variables, passed as arguments to other functions, and returned as values from functions.</p>
+<h4 id="assign-function-to-a-variable">Assign function to a variable<a href="#assign-function-to-a-variable" class="hanchor" ariaLabel="Anchor">#</a> </h4>
+<blockquote>
+<p>In this example, we define a function add that takes two integer arguments and returns their sum. We then assign the function to a variable myFunc using the function name, without calling it with parentheses. We can then call the function using the variable myFunc, passing in the arguments as usual.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> add(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Assign the function to a variable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> myFunc <span style="color:#f92672">=</span> add;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Call the function through the variable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(myFunc(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>)); <span style="color:#75715e">// Output: 5
+</span></span></span></code></pre></div><h4 id="passing-a-function-as-an-argument-to-another-function">Passing a function as an argument to another function<a href="#passing-a-function-as-an-argument-to-another-function" class="hanchor" ariaLabel="Anchor">#</a> </h4>
+<blockquote>
+<p>In this example, we define a function applyFunction that takes another function as its first argument, along with two integer arguments. The function simply calls the passed function with the integer arguments and prints the result. We also define another function subtract that takes two integer arguments and returns their difference. We then call applyFunction with subtract as the first argument, along with 5 and 3 as the other two arguments.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function that takes another function as an argument
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">void</span> applyFunction(<span style="color:#66d9ef">int</span> Function(<span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">int</span>) func, <span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>    print(func(a, b));
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function to pass as an argument
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> subtract(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">-</span> b;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Call applyFunction with the subtract function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  applyFunction(subtract, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">3</span>); <span style="color:#75715e">// Output: 2
+</span></span></span></code></pre></div><h4 id="returning-a-function-from-another-function">Returning a function from another function<a href="#returning-a-function-from-another-function" class="hanchor" ariaLabel="Anchor">#</a> </h4>
+<blockquote>
+<p>In this example, we define a function makeGreeter that takes a String argument name and returns another function that takes no arguments and prints a greeting message using the name. We then call makeGreeter with &ldquo;Bob&rdquo; as the argument, which returns a function that greets &ldquo;Bob&rdquo;. We store this function in a variable greetBob and then call it, which prints &ldquo;Hello, Bob!&rdquo; to the console.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function that returns a function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  Function makeGreeter(<span style="color:#66d9ef">String</span> name) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> () <span style="color:#f92672">=&gt;</span> print(<span style="color:#e6db74">&#34;Hello, </span><span style="color:#e6db74">$</span>name<span style="color:#e6db74">!&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Call makeGreeter to get a function and store it in a variable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> greetBob <span style="color:#f92672">=</span> makeGreeter(<span style="color:#e6db74">&#34;Bob&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Call the returned function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  greetBob(); <span style="color:#75715e">// Output: Hello, Bob!
+</span></span></span></code></pre></div><hr>
+<h3 id="arrow-function">Arrow Function<a href="#arrow-function" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>The arrow function syntax is a shorthand way of defining a function in Dart. Instead of using the function keyword, we can define a function using an arrow (=&gt;) after the function signature. The arrow function syntax is useful for defining short, one-line functions, and can make our code more concise and easier to read.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Arrow function syntax
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">int</span> multiply(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) <span style="color:#f92672">=&gt;</span> a <span style="color:#f92672">*</span> b;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(multiply(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>)); <span style="color:#75715e">// Output: 6
+</span></span></span></code></pre></div><h3 id="anonymous-function-lamda-functions">Anonymous Function (lamda functions)<a href="#anonymous-function-lamda-functions" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, an anonymous function is a function that is defined without a name. Instead of giving the function a name, we can assign it to a variable, which allows us to call the function by invoking the variable.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Define an anonymous function and assign it to a variable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> square <span style="color:#f92672">=</span> (<span style="color:#66d9ef">int</span> x) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> x <span style="color:#f92672">*</span> x;
+</span></span><span style="display:flex;"><span>  };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Usage
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(square(<span style="color:#ae81ff">2</span>)); <span style="color:#75715e">// Output: 4
+</span></span></span></code></pre></div><p>Anonymous functions are useful for defining functions that are only used once, or for passing functions as arguments to other functions. For example, we can pass an anonymous function as an argument to the map method of a List object to apply the function to each element of the list.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> numbers <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Use an anonymous function with the map method to square each element
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> squaredNumbers <span style="color:#f92672">=</span> numbers.map((<span style="color:#66d9ef">int</span> x) <span style="color:#f92672">=&gt;</span> x <span style="color:#f92672">*</span> x);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Output the squared numbers
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(squaredNumbers); <span style="color:#75715e">// Output: (1, 4, 9, 16, 25)
+</span></span></span></code></pre></div><h2 id="class">Class<a href="#class" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In Dart, a class is a blueprint for creating objects that encapsulate data and behavior. It defines the attributes (or properties) and methods that are common to all objects created from that class.</p>
+<p>You can mark some of the object&rsquo;s data as private by prefixing it with an underscore (&quot;_&quot;). This means that it should only be accessed or changed from within the class, not from outside.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Person</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Attributes (or properties) that each object will have.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">String</span> name;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> age;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Private property, which can be only accessed through getters and setters
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">String</span> _address;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// A constructor initializes the attributes when an object is created.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Person(<span style="color:#66d9ef">this</span>.name, <span style="color:#66d9ef">this</span>.age);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Methods define the behavior that each object will have.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> sayHello() {
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#34;Hello, my name is </span><span style="color:#e6db74">$</span>name<span style="color:#e6db74"> and I&#39;m </span><span style="color:#e6db74">$</span>age<span style="color:#e6db74"> years old.&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You can create a new object from a class using the constructor
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// Creating objects in Dart 2 no longer requires the use of the &#34;new&#34; keyword.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> john <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Person(<span style="color:#e6db74">&#34;John&#34;</span>, <span style="color:#ae81ff">25</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You can access the object&#39;s attributes and call its methods
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// using the dot notation.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  print(john.name); <span style="color:#75715e">// Output: John
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  john.sayHello(); <span style="color:#75715e">// Output: Hello, my name is John and I&#39;m 25 years old.
+</span></span></span></code></pre></div><h3 id="abstract-class">Abstract Class<a href="#abstract-class" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>An abstract class in Dart is a class that cannot be directly instantiated, but can be used as a base class for other classes. It can contain abstract methods, which are methods without an implementation, and concrete methods, which have a body.</p>
+<p>An abstract class can define a common interface for a group of related classes, and can be used to enforce consistency among its subclasses. It can also be used to define a type that can be used to restrict function arguments.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// An abstract class is a class that cannot be instantiated directly,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// but can be used as a superclass.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Animal</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Abstract methods define method signatures without implementation.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">void</span> makeSound();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> eat() { <span style="color:#75715e">// Concrete methods can also be defined in an abstract class.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      print(<span style="color:#e6db74">&#34;The animal is eating.&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Subclasses of an abstract class must implement all abstract methods.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Cat</span> <span style="color:#66d9ef">extends</span> Animal {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> makeSound() <span style="color:#f92672">=&gt;</span> print(<span style="color:#e6db74">&#34;Meow!&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Dog</span> <span style="color:#66d9ef">extends</span> Animal {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> makeSound() <span style="color:#f92672">=&gt;</span> print(<span style="color:#e6db74">&#34;Woof!&#34;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You can also use an abstract class to define a type that can be used
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// to restrict function arguments.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">void</span> soundOff(Animal animal) <span style="color:#f92672">=&gt;</span> animal.makeSound();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You cannot create an instance of an abstract class directly,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// but you can create instances of its subclasses.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> cat <span style="color:#f92672">=</span> Cat();
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">var</span> dog <span style="color:#f92672">=</span> Dog();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You can call methods on the objects as usual, and pass them to functions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// that take the abstract class as a parameter.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  cat.makeSound(); <span style="color:#75715e">// Output: Meow!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  dog.makeSound(); <span style="color:#75715e">// Output: Woof!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  soundOff(cat); <span style="color:#75715e">// Output: Meow!
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  soundOff(dog); <span style="color:#75715e">// Output: Woof!
+</span></span></span></code></pre></div><h3 id="getters-and-setters">Getters and Setters<a href="#getters-and-setters" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, getters and setters are special methods that allow you to control access to an object&rsquo;s properties. Getters retrieve the current value of a property, while setters change the value of a property.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Person</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Private attributes can only be accessed through getters and setters.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">String</span> _name;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> _age;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Getters retrieve the current value of an attribute.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">String</span> <span style="color:#66d9ef">get</span> name <span style="color:#f92672">=&gt;</span> _name;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> <span style="color:#66d9ef">get</span> age <span style="color:#f92672">=&gt;</span> _age;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Setters change the value of an attribute, with optional validation logic.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">set</span> name(<span style="color:#66d9ef">String</span> value) <span style="color:#f92672">=&gt;</span> _name <span style="color:#f92672">=</span> value;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">set</span> age(<span style="color:#66d9ef">int</span> value) <span style="color:#f92672">=&gt;</span> _age <span style="color:#f92672">=</span> value <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> value <span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Person(<span style="color:#66d9ef">this</span>._name, <span style="color:#66d9ef">this</span>._age);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// You can use getters and setters to control access to an object&#39;s properties.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">var</span> john <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Person(<span style="color:#e6db74">&#34;John&#34;</span>, <span style="color:#ae81ff">25</span>);
+</span></span><span style="display:flex;"><span>  print(john.name); <span style="color:#75715e">// Output: John
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  john.age <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>;
+</span></span><span style="display:flex;"><span>  print(john.age); <span style="color:#75715e">// Output: 0
+</span></span></span></code></pre></div><h2 id="interfaces">Interfaces<a href="#interfaces" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In Dart, an interface is a contract that defines a set of method signatures that a class must implement. An interface only specifies the method signatures, not their implementation. A class that implements an interface must provide an implementation for all the methods declared in the interface.</p>
+<blockquote>
+<p>In below example, Vehicle, defines two methods that a class must implement: start() and stop(). Any class that implements this interface must provide its own implementation for these methods.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#75715e">// Define an interface
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Vehicle</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> start();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> stop();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Implement the interface
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span> <span style="color:#66d9ef">implements</span> Vehicle {
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">@</span>override
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> start() {
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;Starting the car&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#960050;background-color:#1e0010">@</span>override
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> stop() {
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;Stopping the car&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="exceptions">Exceptions<a href="#exceptions" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>In Dart, exceptions are a way to handle runtime errors and abnormal conditions that occur during program execution. An exception is an object that represents an error that occurred during the execution of a program.</p>
+<blockquote>
+<p>The try block is used to enclose the code that might throw an exception. The catch block is used to handle the exception if it is thrown. The on keyword is used to specify the type of exception to catch. The finally block is used to specify code that should be executed regardless of whether an exception was thrown or not.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> result <span style="color:#f92672">=</span> <span style="color:#ae81ff">12</span> <span style="color:#f92672">~/</span> <span style="color:#ae81ff">0</span>; <span style="color:#75715e">// This line will throw an exception
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  } on IntegerDivisionByZeroException {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Cannot divide by zero&#39;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">catch</span> (e) {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;An exception occurred: </span><span style="color:#e6db74">$</span>e<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">finally</span> {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;This code will always be executed&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h3 id="throw-exceptions">Throw Exceptions<a href="#throw-exceptions" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, you can throw or raise an exception using the throw keyword. You can throw any object as an exception. Typically, you would throw an object that extends the Exception class or one of its subclasses, such as FormatException, ArgumentError, or RangeError.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> validateAge(<span style="color:#66d9ef">int</span> age) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (age <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> age <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">120</span>) {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">throw</span> ArgumentError(<span style="color:#e6db74">&#39;Invalid age: </span><span style="color:#e6db74">$</span>age<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>      validateAge(<span style="color:#ae81ff">150</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (e) {
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#39;An exception occurred: </span><span style="color:#e6db74">$</span>e<span style="color:#e6db74">&#39;</span>); <span style="color:#75715e">// An exception occurred: Invalid age: 150
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="futures">Futures<a href="#futures" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<p>Futures represent a value that may not be available yet but will be available at some point in the future. They are often used in asynchronous programming, where the application needs to perform some long-running task, such as a network request or file I/O, without blocking the main thread. Instead of waiting for the task to complete before moving on, the application can create a Future object to represent the task and continue executing other code. When the task is finished, the Future object is updated with the result.</p>
+<blockquote>
+<p>In this example, we use the http package to send a GET request to the API endpoint and fetch the username. We then use async/await to wait for the username to be fetched before printing it. If an error occurs while fetching the username, we handle it using a try/catch block and print an error message.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;dart:async&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;dart:convert&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">import</span> <span style="color:#e6db74">&#39;package:http/http.dart&#39;</span> <span style="color:#66d9ef">as</span> http;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Define the URL for the API endpoint
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">String</span> apiEndpoint <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://example.com/api/user&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function to fetch the username from the API and return a Future
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  Future<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">String</span><span style="color:#f92672">&gt;</span> fetchUsername() <span style="color:#66d9ef">async</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Send a GET request to the API endpoint
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">final</span> response <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> http.<span style="color:#66d9ef">get</span>(Uri.parse(apiEndpoint));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (response.statusCode <span style="color:#f92672">==</span> <span style="color:#ae81ff">200</span>) { <span style="color:#75715e">// If the response is successful
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">final</span> json <span style="color:#f92672">=</span> jsonDecode(response.body); <span style="color:#75715e">// Parse the JSON response
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">return</span> json[<span style="color:#e6db74">&#39;username&#39;</span>]; <span style="color:#75715e">// Return the username
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    } <span style="color:#66d9ef">else</span> { <span style="color:#75715e">// If the response is not successful
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      <span style="color:#66d9ef">throw</span> Exception(<span style="color:#e6db74">&#39;Failed to fetch username&#39;</span>); <span style="color:#75715e">// Throw an exception
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Define a function to print the username using async/await
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  Future<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span><span style="color:#f92672">&gt;</span> printUsername() <span style="color:#66d9ef">async</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">final</span> username <span style="color:#f92672">=</span> <span style="color:#66d9ef">await</span> fetchUsername(); <span style="color:#75715e">// Wait for the username to be fetched
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      print(<span style="color:#e6db74">&#39;The username is </span><span style="color:#e6db74">$</span>username<span style="color:#e6db74">&#39;</span>); <span style="color:#75715e">// Print the username
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    } <span style="color:#66d9ef">catch</span> (e) { <span style="color:#75715e">// Handle any errors that occur while fetching the username
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>      print(<span style="color:#e6db74">&#39;Error fetching username: </span><span style="color:#e6db74">$</span>e<span style="color:#e6db74">&#39;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Fetching username...&#39;</span>);
+</span></span><span style="display:flex;"><span>    printUsername(); <span style="color:#75715e">// Call the printUsername() function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Print a message indicating that we&#39;re waiting for the username
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    print(<span style="color:#e6db74">&#39;Waiting for the username to be fetched...&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><h2 id="miscellaneous">Miscellaneous<a href="#miscellaneous" class="hanchor" ariaLabel="Anchor">#</a> </h2>
+<h3 id="null-and-null-aware">Null and Null aware<a href="#null-and-null-aware" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, null is a special value that represents the absence of a value. When a variable is assigned null, it means that the variable doesn&rsquo;t currently have a value.</p>
+<p>The null-aware operator in Dart is a shorthand way of checking whether an object is null before accessing its properties or calling its methods. There are two types of null-aware operators</p>
+<h4 id="1-the--operator"><strong>1. The ?. operator</strong><a href="#1-the--operator" class="hanchor" ariaLabel="Anchor">#</a> </h4>
+<p>This operator is used to safely access properties and methods of an object that might be null. If the object is null, the expression will short-circuit and return null, without attempting to access the property or call the method.</p>
+<blockquote>
+<p>If the person object is null, the name variable will be assigned null without throwing a NullPointerException.</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Person</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">String</span> name;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Person person;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// name variable will be null instead of raising a NullPointerException
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">String</span> name <span style="color:#f92672">=</span> person<span style="color:#f92672">?</span>.name;
+</span></span></code></pre></div><h4 id="2-the--operator"><strong>2. The ?? operator</strong><a href="#2-the--operator" class="hanchor" ariaLabel="Anchor">#</a> </h4>
+<p>This operator is used to provide a default value if the expression to the left of the operator is null. If the expression is not null, the operator returns its value.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> getUserAge() {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// some logic to retrieve the user&#39;s age
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> age <span style="color:#f92672">=</span> getUserAge() <span style="color:#f92672">??</span> <span style="color:#ae81ff">18</span>;
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;The user is </span><span style="color:#e6db74">${</span>age<span style="color:#e6db74">}</span><span style="color:#e6db74"> years old.&#39;</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><hr>
+<h3 id="ternary-operator">Ternary Operator<a href="#ternary-operator" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>The ternary operator is a shorthand way of writing an if-else statement in Dart.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// traditional approach using if-else
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> age <span style="color:#f92672">=</span> <span style="color:#ae81ff">25</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">String</span> status;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (age <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">18</span>) {
+</span></span><span style="display:flex;"><span>      status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Adult&#39;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      status <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Minor&#39;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Ternary Operator
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Syntaxt : condition ? true : false
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">String</span> result <span style="color:#f92672">=</span> age <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">18</span> <span style="color:#f92672">?</span> <span style="color:#e6db74">&#39;Adult&#39;</span> <span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Minor&#39;</span>;  <span style="color:#75715e">// Adult
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    print(status);
+</span></span><span style="display:flex;"><span>    print(result);
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><hr>
+<h3 id="spread-operator">Spread Operator<a href="#spread-operator" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>In Dart, the spread operator (&hellip;) is used to &ldquo;spread&rdquo; the elements of a collection into another collection. The spread operator can be used with lists, sets, and maps.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> list1 <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> list2 <span style="color:#f92672">=</span> [<span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> combinedList <span style="color:#f92672">=</span> [...list1, ...list2];
+</span></span><span style="display:flex;"><span>    print(combinedList); <span style="color:#75715e">// Output: [1, 2, 3, 4, 5, 6]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Can also combine with other values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">var</span> combinedList <span style="color:#f92672">=</span> [<span style="color:#ae81ff">0</span>, ...list1, ...list2, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">9</span>];
+</span></span><span style="display:flex;"><span>    print(combinedList); <span style="color:#75715e">// Output: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  }
+</span></span></code></pre></div><hr>
+<h3 id="cascade-notation">Cascade Notation<a href="#cascade-notation" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<p>Cascade notation is a feature in Dart that allows you to perform a sequence of operations on an object by chaining them together using the &ldquo;..&rdquo; operator. This operator is also known as the cascade operator.</p>
+<p>The cascade notation is particularly useful when you want to perform multiple operations on the same object. Instead of creating temporary variables or repeatedly referencing the same object, you can use cascade notation to chain the operations together.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-dart" data-lang="dart"><span style="display:flex;"><span>  <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Person</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">String</span> name;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> age;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> introduce() {
+</span></span><span style="display:flex;"><span>      print(<span style="color:#e6db74">&#34;Hello, my name is </span><span style="color:#e6db74">$</span>name<span style="color:#e6db74"> and I am </span><span style="color:#e6db74">$</span>age<span style="color:#e6db74"> years old.&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> person <span style="color:#f92672">=</span> Person()
+</span></span><span style="display:flex;"><span>      ..name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;John&#34;</span>
+</span></span><span style="display:flex;"><span>      ..age <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
+</span></span><span style="display:flex;"><span>      ..introduce();
+</span></span><span style="display:flex;"><span>  }
+</span></span></code></pre></div><hr>
+<h3 id="references">References<a href="#references" class="hanchor" ariaLabel="Anchor">#</a> </h3>
+<ul>
+<li><strong><a href="https://quickref.me/dart">https://quickref.me/dart</a></strong></li>
+</ul>
+
+      </div></div>
+
+  
+    
+<div class="pagination">
+  <div class="pagination__title">
+    <span class="pagination__title-h">Read other posts</span>
+    <hr />
+  </div>
+  <div class="pagination__buttons">
+    
+      <a href="http://localhost:1313/blogs/programming/multitenancy_in_golang/" class="button inline prev">
+        Multitenancy Using Golang (WIP)
+      </a>
+    
+    
+    
+  </div>
+</div>
+
+
+  
+
+  
+    
+
+  
+</article>
+
+  </div>
+
+  
+    
+
+
+
+
+<script type="text/javascript" src="/bundle.min.js"></script>
+
+
+
+
+
+  
+</div>
+
+</body>
+</html>

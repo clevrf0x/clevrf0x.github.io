@@ -149,7 +149,7 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">fwrite&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>seed_number, &lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">4&lt;/span>, encrypted_fp);
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">fwrite&lt;/span>(buffer, &lt;span style="color:#ae81ff">1&lt;/span>, file_size, encrypted_fp);
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">fclose&lt;/span>(encrypted_fp);
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Much more readable than our initial decompiled code, right? Now, let&amp;rsquo;s build an algorithm to reverse this process and retrieve the actual flag!&lt;/p>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>More readable than our initial decompiled code, right? Now, let&amp;rsquo;s build an algorithm to reverse this process and retrieve the actual flag!&lt;/p>
 &lt;h3 id="solution">Solution&lt;/h3>
 &lt;p>Before diving into the code for the final solution, let&amp;rsquo;s first create an algorithm to reverse the encryption process to understand the flow.&lt;/p>
 &lt;h4 id="algorithm">Algorithm&lt;/h4>

@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Programming on Favas M</title><link>https://favas.dev/categories/programming/</link><description>Recent content in Programming on Favas M</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sat, 21 Sep 2024 16:25:54 +0530</lastBuildDate><atom:link href="https://favas.dev/categories/programming/index.xml" rel="self" type="application/rss+xml"/><item><title>Multitenancy Using Golang (WIP)</title><link>https://favas.dev/blogs/programming/multitenancy_in_golang/</link><pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate><guid>https://favas.dev/blogs/programming/multitenancy_in_golang/</guid><description>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p></description><content>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p>
+&lt;p>Keep in mind that I haven&amp;rsquo;t tested this system in a high-traffic production environment, so it may have performance limitations. Please adapt the approach to your specific needs and use cases.&lt;/p>
+&lt;h3 id="tldr">TL;DR:&lt;/h3>
+&lt;p>This post shares my experience building a multi-tenant system in Golang. The example code is meant to illustrate the concept and might have unhandled exceptions or security vulnerabilities. Make sure to thoroughly review and test the code before deploying it in a production environment.&lt;/p>
+&lt;h3 id="what-is-multi-tenancy">What is Multi-Tenancy&lt;/h3>
+&lt;p>Before we explore how to build a multi-tenant system, let&amp;rsquo;s clarify what multi-tenancy is. According to Wikipedia, &amp;ldquo;Multitenancy is a software architecture where a single instance of an application serves multiple users or organizations&amp;rdquo;, users are often referred to as &amp;rsquo;tenants.'&lt;/p>
+&lt;p>But what does that mean? Imagine you have a product with two users who both need identical environments but require their data to be completely isolated. In the past, the solution was to host two separate instances of the application, either on-premises or in the cloud. However, this approach has several downsides:&lt;/p>
+&lt;ul>
+&lt;li>It becomes expensive to spin up new servers for every user.&lt;/li>
+&lt;li>Managing separate instances becomes difficult as the user base grows. For example, managing 100 instances for 100 customers can be a huge headache.&lt;/li>
+&lt;li>Different instances might run different versions of the app, leading to inconsistency.&lt;/li>
+&lt;li>Handling database migrations across multiple environments can become a major challenge.&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="Single Tenant Application Architecture" src="https://favas.dev/blogs/programming/multi-tenancy-in-golang/single-tenant-architecture.png">&lt;/p>
+&lt;!-- _Single Tenant Application Architecture_ -->
+&lt;p>What&amp;rsquo;s the alternative? Instead of spinning up separate instances, we could host a single instance of the application where every tenant can interact with it, while still keeping their data isolated. This is where multi-tenancy comes in.&lt;/p>
+&lt;p>Using a multi-tenant architecture allows us to:&lt;/p>
+&lt;ul>
+&lt;li>Roll out version updates and database migrations across all tenants simultaneously.&lt;/li>
+&lt;li>Reduce operational overhead by managing a single instance.&lt;/li>
+&lt;li>Lower infrastructure costs.&lt;/li>
+&lt;/ul>
+&lt;h3 id="real-world-examples-of-multi-tenant-architecture">Real-world Examples of Multi-Tenant Architecture&lt;/h3>
+&lt;p>Many popular SaaS products use multi-tenancy successfully. Here are a few examples:&lt;/p>
+&lt;ul>
+&lt;li>Microsoft Office 365&lt;/li>
+&lt;li>GitHub&lt;/li>
+&lt;li>Twilio&lt;/li>
+&lt;li>Canva&lt;/li>
+&lt;li>Atlassian Products (e.g., Jira, Confluence)&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img alt="Multi-Tenant Application Architecture" src="https://favas.dev/blogs/programming/multi-tenancy-in-golang/multi-tenant-architecture.png">&lt;/p>
+&lt;!-- _Multi-Tenant Application Architecture_ -->
+&lt;h3 id="how-to-achieve-data-isolation-in-multi-tenancy">How to Achieve Data Isolation in Multi-Tenancy&lt;/h3>
+&lt;p>Now that we understand what multi-tenancy is, let&amp;rsquo;s explore how to implement it in a way that ensures data isolation between tenants. There are primarily three methods for achieving this, each with its own pros and cons:&lt;/p>
+&lt;h4 id="1-database-level-isolation">1. Database-Level Isolation&lt;/h4>
+&lt;p>In database-level isolation, each tenant&amp;rsquo;s data is stored in a separate database. A shared public database is used for common data.&lt;/p>
+&lt;h5 id="pros">Pros:&lt;/h5>
+&lt;ul>
+&lt;li>Each tenant&amp;rsquo;s data is completely isolated in a separate database.&lt;/li>
+&lt;li>Low risk of accidentally accessing cross-tenant data.&lt;/li>
+&lt;/ul>
+&lt;h5 id="cons">Cons:&lt;/h5>
+&lt;ul>
+&lt;li>Tenants cannot have foreign key relationships between their data and the shared public database.&lt;/li>
+&lt;li>Switching between tenant databases and the public database adds performance overhead. This can be mitigated by injecting separate database sessions into your handlers.&lt;/li>
+&lt;li>It&amp;rsquo;s complex to implement and maintain.&lt;/li>
+&lt;/ul>
+&lt;h4 id="2-schema-level-isolation">2. Schema-Level Isolation&lt;/h4>
+&lt;p>In schema-level isolation, all tenants share the same database, but their data is separated into individual schemas. A shared public schema is used for common data.&lt;/p>
+&lt;h5 id="pros-1">Pros:&lt;/h5>
+&lt;ul>
+&lt;li>Data is isolated at the schema level, similar to database-level isolation.&lt;/li>
+&lt;li>No significant performance overhead when switching between public and tenant schemas.&lt;/li>
+&lt;li>Reduced complexity compared to database-level isolation.&lt;/li>
+&lt;li>Reusing the same database connection for both tenant and public data is easier to implement.&lt;/li>
+&lt;/ul>
+&lt;h5 id="cons-1">Cons:&lt;/h5>
+&lt;ul>
+&lt;li>Less strict data isolation compared to database-level isolation.&lt;/li>
+&lt;/ul>
+&lt;h4 id="3-row-level-isolation">3. Row-Level Isolation&lt;/h4>
+&lt;p>In row-level isolation, each tenant&amp;rsquo;s data is stored in the same tables, but a &amp;ldquo;tenant ID&amp;rdquo; column is added to differentiate records by tenant.&lt;/p>
+&lt;h5 id="pros-2">Pros:&lt;/h5>
+&lt;ul>
+&lt;li>Simple to implement and maintain.&lt;/li>
+&lt;li>Easy to apply database migrations.&lt;/li>
+&lt;li>Foreign key relationships between tables can be maintained as needed.&lt;/li>
+&lt;/ul>
+&lt;h5 id="cons-2">Cons:&lt;/h5>
+&lt;ul>
+&lt;li>Data is less isolated compared to database or schema-level isolation.&lt;/li>
+&lt;li>There&amp;rsquo;s a higher risk of accidental cross-tenant data access through query errors.&lt;/li>
+&lt;/ul>
+&lt;h4 id="other-methods">Other Methods&lt;/h4>
+&lt;p>There are additional methods, such as creating prefixed tables for each tenant (e.g., &lt;code>tenant1_users&lt;/code>, &lt;code>tenant2_users&lt;/code>). However, this approach is less common because it complicates database migrations and increases maintenance efforts.&lt;/p>
+&lt;h3 id="how-to-implement-multi-tenancy">How to Implement Multi-Tenancy&lt;/h3>
+&lt;p>For this blog post, we will be implementing schema-level isolation. After weighing the pros and cons of each approach, I believe schema-level isolation provides a balanced trade-off between complexity and data isolation, making it a good choice for this demonstration.&lt;/p>
+&lt;p>To keep this project as a proof of concept, we&amp;rsquo;ll use a minimal set of dependencies. Here&amp;rsquo;s the stack we&amp;rsquo;ll be working with:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Routing:&lt;/strong> We&amp;rsquo;ll use the Chi library for routing. It&amp;rsquo;s lightweight, easy to use, and simplifies middleware implementation, making the codebase more manageable.&lt;/li>
+&lt;li>&lt;strong>Database Interaction:&lt;/strong> For database queries, we&amp;rsquo;ll use &lt;code>sqlc&lt;/code> to generate Go code, ensuring type safety with minimal boilerplate.&lt;/li>
+&lt;li>&lt;strong>Migrations:&lt;/strong> Goose will handle our database migrations, allowing for smooth updates to the database schema as new tenants are added.&lt;/li>
+&lt;li>&lt;strong>Database:&lt;/strong> We&amp;rsquo;ll use PostgreSQL, which natively supports schema-level isolation, making it the ideal choice for this project.&lt;/li>
+&lt;/ul>
+&lt;p>With these tools, we&amp;rsquo;ll go step-by-step through setting up multi-tenancy using schema-level isolation.&lt;/p>
+&lt;h3 id="project-structure">Project Structure&lt;/h3>
+&lt;p>Now this project structure will seem a bit redundant or strange for some of the Go developers. This is how I generally build projects in Golang. Since this is not a blog about how to build API servers in Golang, I will not dwell deep into the structure; I will explain as much as I can of each package and file&amp;rsquo;s purposes as we progress.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>.
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── middlewares
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── middlewares.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── router.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── main.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── migrate
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── helpers.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── main.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── db
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── migrations
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── shared
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── 00001_init_db.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── tenant
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── 00001_init_db.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── queries
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── shared
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── tenant.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── tenant
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── user.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docker-compose.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .env
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .env.example
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .gitignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── pkg
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── helpers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── server
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── server.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── sqlc.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></content></item><item><title>Dart Cheatsheet</title><link>https://favas.dev/blogs/programming/dart_cheatsheet/</link><pubDate>Wed, 05 Oct 2022 16:25:54 +0530</pubDate><guid>https://favas.dev/blogs/programming/dart_cheatsheet/</guid><description>&lt;h2 id="basic-program">Basic Program&lt;/h2>
+&lt;p>In Dart Programming Language, main() function is the entry point for all function.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Hello World&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="variables-and-data-types">Variables and Data Types&lt;/h2>
+&lt;blockquote>
+&lt;p>If a variable is being initialized during declaration, it is considered better practice to use the var keyword instead of explicitly typing the variable. However, if a variable is not being initialized during declaration, giving it an explicit type is considered good practice.&lt;/p></description><content>&lt;h2 id="basic-program">Basic Program&lt;/h2>
+&lt;p>In Dart Programming Language, main() function is the entry point for all function.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Hello World&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="variables-and-data-types">Variables and Data Types&lt;/h2>
+&lt;blockquote>
+&lt;p>If a variable is being initialized during declaration, it is considered better practice to use the var keyword instead of explicitly typing the variable. However, if a variable is not being initialized during declaration, giving it an explicit type is considered good practice.&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="final-vs-const">final vs const&lt;/h3>
+&lt;p>In Dart, final and const are used for declaring immutable variables.&lt;/p>
+&lt;p>The differences between final and const are:&lt;/p>
+&lt;p>final variables can be set once and their value is evaluated at runtime.
+const variables are evaluated at compile-time and are immutable throughout the program&amp;rsquo;s execution.
+const can only be used with values that are known at compile-time, while final can be used with values that are determined at runtime.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Numbers
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> age &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">30&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">double&lt;/span> height &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1.75&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">num&lt;/span> weight &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">68.5&lt;/span>; &lt;span style="color:#75715e">// both int and double will be valid
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;Age: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>age&lt;span style="color:#e6db74">, Height: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>height&lt;span style="color:#e6db74">, Weight: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>weight&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Strings
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Alice&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">String&lt;/span> message &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Hello, &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>name&lt;span style="color:#e6db74">!&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(message);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Booleans
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> isRaining &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">bool&lt;/span> isSunny &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Is it raining? &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>isRaining&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Is it sunny? &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>isSunny&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Dynamic (no fixed type, any value can be assigned)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">dynamic&lt;/span> value &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">42&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Value: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>value&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> value &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Value: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>value&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Object
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">Object&lt;/span> obj &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;hello&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(obj.runtimeType);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> obj &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">42&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(obj.runtimeType);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Final (value can change during runtime)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> DateTime now &lt;span style="color:#f92672">=&lt;/span> DateTime.now();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Const (compile time constant)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> homePlanet &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Earth&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> daysInWeek &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">7&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Home planet: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>homePlanet&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Days in week: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>daysInWeek&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Var (automatically type inferred)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> isWindy &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> temperature &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">25.0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Is it windy? &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>isWindy&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Temperature: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>temperature&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="collections">Collections&lt;/h2>
+&lt;h3 id="map">Map&lt;/h3>
+&lt;ul>
+&lt;li>Stores data as key-value pairs&lt;/li>
+&lt;li>Each key in the map must be unique&lt;/li>
+&lt;li>Can be created with or without type annotations&lt;/li>
+&lt;li>Accessed using keys&lt;/li>
+&lt;li>Supports operations such as adding and removing key-value pairs&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Map: The Map object is a key and value pair.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Keys and values on a map may be of any type. It is a dynamic collection.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Creating a map with type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Map&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>, &lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> ages &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Alice&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">30&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Bob&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">25&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Charlie&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">35&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(ages); &lt;span style="color:#75715e">// {&amp;#34;Alice&amp;#34;: 30, &amp;#34;Bob&amp;#34;: 25, &amp;#34;Charlie&amp;#34;: 35}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Creating a map without type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> salaries &lt;span style="color:#f92672">=&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Alice&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">50000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Bob&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">60000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#e6db74">&amp;#39;Charlie&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">70000&lt;/span>,
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(salaries); &lt;span style="color:#75715e">// {&amp;#34;Alice&amp;#34;: 50000, &amp;#34;Bob&amp;#34;: 60000, &amp;#34;Charlie&amp;#34;: 70000}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Accessing a value by key
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(ages[&lt;span style="color:#e6db74">&amp;#39;Alice&amp;#39;&lt;/span>]); &lt;span style="color:#75715e">// 30
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(salaries[&lt;span style="color:#e6db74">&amp;#39;Bob&amp;#39;&lt;/span>]); &lt;span style="color:#75715e">// 60000
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Adding a key-value pair to the map
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> ages[&lt;span style="color:#e6db74">&amp;#39;David&amp;#39;&lt;/span>] &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">40&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(ages); &lt;span style="color:#75715e">// {&amp;#34;Alice&amp;#34;: 30, &amp;#34;Bob&amp;#34;: 25, &amp;#34;Charlie&amp;#34;: 35, &amp;#34;David&amp;#34;: 40}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Removing a key-value pair from the map
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> salaries.remove(&lt;span style="color:#e6db74">&amp;#39;Charlie&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(salaries); &lt;span style="color:#75715e">// {&amp;#34;Alice&amp;#34;: 50000, &amp;#34;Bob&amp;#34;: 60000}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Checking if a map contains a key
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(ages.containsKey(&lt;span style="color:#e6db74">&amp;#39;Alice&amp;#39;&lt;/span>)); &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(salaries.containsKey(&lt;span style="color:#e6db74">&amp;#39;Charlie&amp;#39;&lt;/span>)); &lt;span style="color:#75715e">// false
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Iterating over a map using a for loop
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">var&lt;/span> entry &lt;span style="color:#66d9ef">in&lt;/span> ages.entries) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>entry.key&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">: &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>entry.value&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;Alice: 30&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;Bob: 25&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;Charlie: 35&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;David: 40&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Iterating over a map using forEach() method
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> salaries.forEach((key, value) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>key&lt;span style="color:#e6db74"> earns &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>value&lt;span style="color:#e6db74"> dollars&amp;#39;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;Alice earns 50000 dollars&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;Bob earns 60000 dollars&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="list">List&lt;/h3>
+&lt;ul>
+&lt;li>Stores data as an ordered collection of elements&lt;/li>
+&lt;li>Elements can be of any data type&lt;/li>
+&lt;li>Can be created with or without type annotations&lt;/li>
+&lt;li>Accessed using index values&lt;/li>
+&lt;li>Supports operations such as adding and removing elements&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// List: List data type is similar to arrays.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// A list is used to represent a collection of objects.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// It is an ordered group of objects.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Creating a list with type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> List&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> fruits &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;apple&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;banana&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;orange&amp;#34;&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(fruits); &lt;span style="color:#75715e">// [&amp;#34;apple&amp;#34;, &amp;#34;banana&amp;#34;, &amp;#34;orange&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Creating a list without type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> vegetables &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#e6db74">&amp;#34;carrot&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;spinach&amp;#34;&lt;/span>, &lt;span style="color:#e6db74">&amp;#34;broccoli&amp;#34;&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(vegetables); &lt;span style="color:#75715e">// [&amp;#34;carrot&amp;#34;, &amp;#34;spinach&amp;#34;, &amp;#34;broccoli&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Adding an element to the list
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> fruits.add(&lt;span style="color:#e6db74">&amp;#34;grape&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(fruits); &lt;span style="color:#75715e">// [&amp;#34;apple&amp;#34;, &amp;#34;banana&amp;#34;, &amp;#34;orange&amp;#34;, &amp;#34;grape&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Removing an element from the list
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> vegetables.remove(&lt;span style="color:#e6db74">&amp;#34;spinach&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(vegetables); &lt;span style="color:#75715e">// [&amp;#34;carrot&amp;#34;, &amp;#34;broccoli&amp;#34;]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Accessing an element in the list
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(fruits[&lt;span style="color:#ae81ff">0&lt;/span>]); &lt;span style="color:#75715e">// &amp;#34;apple&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(vegetables[&lt;span style="color:#ae81ff">1&lt;/span>]); &lt;span style="color:#75715e">// &amp;#34;broccoli&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Checking if a list contains a value
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(fruits.contains(&lt;span style="color:#e6db74">&amp;#34;apple&amp;#34;&lt;/span>)); &lt;span style="color:#75715e">// true
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(vegetables.contains(&lt;span style="color:#e6db74">&amp;#34;spinach&amp;#34;&lt;/span>)); &lt;span style="color:#75715e">// false
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Iterating over a list using a for loop
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">var&lt;/span> fruit &lt;span style="color:#66d9ef">in&lt;/span> fruits) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(fruit);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;apple&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;banana&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;orange&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;grape&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Iterating over a list using forEach() method
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> vegetables.forEach((vegetable) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(vegetable));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;carrot&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// &amp;#34;broccoli&amp;#34;
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="set">Set&lt;/h3>
+&lt;ul>
+&lt;li>Stores data as an unordered collection of unique elements&lt;/li>
+&lt;li>Elements can be of any data type&lt;/li>
+&lt;li>Cannot contain duplicate elements&lt;/li>
+&lt;li>Can be created with or without type annotations&lt;/li>
+&lt;li>Supports operations such as adding and removing elements&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Using a Set with type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Set&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">int&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> mySet1 &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>};
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(mySet1); &lt;span style="color:#75715e">// Output: {1, 2, 3}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Using a Set without type annotations
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> mySet2 &lt;span style="color:#f92672">=&lt;/span> {&lt;span style="color:#e6db74">&amp;#39;apple&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;banana&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;cherry&amp;#39;&lt;/span>};
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(mySet2); &lt;span style="color:#75715e">// Output: {apple, banana, cherry}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Adding an element to a Set
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> mySet1.add(&lt;span style="color:#ae81ff">4&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(mySet1); &lt;span style="color:#75715e">// Output: {1, 2, 3, 4}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Removing an element from a Set
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> mySet2.remove(&lt;span style="color:#e6db74">&amp;#39;banana&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(mySet2); &lt;span style="color:#75715e">// Output: {apple, cherry}
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Iterating over a Set
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">var&lt;/span> element &lt;span style="color:#66d9ef">in&lt;/span> mySet1) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(element);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output:
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// 1
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// 2
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// 3
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// 4
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>Overall, the choice between Map, List, and Set depends on the specific requirements of your application. Use a Map when you need to store data as key-value pairs and quickly look up values by their keys. Use a List when you need to store data in a specific order and access it by index values. Use a Set when you need to store a collection of unique elements and don&amp;rsquo;t care about their order.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="string-interpolation">String Interpolation&lt;/h2>
+&lt;p>String interpolation is similar to python formatted strings&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// can use single or double qoutes for String type
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> firstName &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Nicola&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> lastName &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;Tesla&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;My name is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>firstName&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74"> &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>lastName&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">//can embed variables in string with $
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> fullName &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>firstName&lt;span style="color:#e6db74"> &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>lastName&lt;span style="color:#e6db74">&amp;#34;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">String&lt;/span> upperCase &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>firstName.toUpperCase()&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(upperCase); &lt;span style="color:#75715e">//Print: NICOLA
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="comments">Comments&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// This is a normal, one-line comment.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">/// This is a documentation comment, used to document libraries,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">/// classes, and their members. Tools like IDEs and dartdoc treat
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">/// doc comments specially.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">/* Comments like these are also supported. */&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="imports">Imports&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing a library from a specific file
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;my_library.dart&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing a library with a prefix
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;my_library.dart&amp;#39;&lt;/span> &lt;span style="color:#66d9ef">as&lt;/span> mylib;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing only specific parts of a library
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;my_library.dart&amp;#39;&lt;/span> &lt;span style="color:#66d9ef">show&lt;/span> MyClass, myFunction;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing everything except specific parts of a library
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;my_library.dart&amp;#39;&lt;/span> &lt;span style="color:#66d9ef">hide&lt;/span> MyClass;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing built-in Dart libraries
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;dart:math&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;dart:convert&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Importing libraries from external packages
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;package:test/test.dart&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="operators">Operators&lt;/h2>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Arithmetic Operators
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> a &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">10&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> b &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;a + b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">+&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Addition
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a - b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">-&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Subtraction
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a * b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">*&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Multiplication
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a / b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">/&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Division
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a ~/ b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">~/&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Integer Division
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a % b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a &lt;span style="color:#f92672">%&lt;/span> b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Modulo
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a++ = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a&lt;span style="color:#f92672">++&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Post-Increment
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;++b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#f92672">++&lt;/span>b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Pre-Increment
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;a-- = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>a&lt;span style="color:#f92672">--&lt;/span>&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Post-Decrement
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;--b = &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#f92672">--&lt;/span>b&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Pre-Decrement
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Equality Operators
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> x &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> y &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> z &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">6&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;x == y is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>x &lt;span style="color:#f92672">==&lt;/span> y&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Equal to
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;x != z is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>x &lt;span style="color:#f92672">!=&lt;/span> z&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Not equal to
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Relational Operators
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> p &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">10&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> q &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;p &amp;gt; q is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>p &lt;span style="color:#f92672">&amp;gt;&lt;/span> q&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Greater than
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;p &amp;lt; q is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>p &lt;span style="color:#f92672">&amp;lt;&lt;/span> q&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Less than
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;p &amp;gt;= q is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>p &lt;span style="color:#f92672">&amp;gt;=&lt;/span> q&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Greater than or equal to
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;p &amp;lt;= q is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>p &lt;span style="color:#f92672">&amp;lt;=&lt;/span> q&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Less than or equal to
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Logical Operators
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> r &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">bool&lt;/span> s &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">false&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;r &amp;amp;&amp;amp; s is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>r &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> s&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Logical AND
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;r || s is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>r &lt;span style="color:#f92672">||&lt;/span> s&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Logical OR
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;!r is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>&lt;span style="color:#f92672">!&lt;/span>r&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Logical NOT
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="control-flows">Control Flows&lt;/h2>
+&lt;h3 id="conditionals">Conditionals&lt;/h3>
+&lt;p>&lt;strong>If Statement&lt;/strong>
+This is used to execute a block of code only if a certain condition is met.&lt;/p>
+&lt;p>&lt;strong>If-Else Ladder&lt;/strong>
+This is used to check multiple conditions in a series of if-else blocks.&lt;/p>
+&lt;p>&lt;strong>Switch Statement&lt;/strong>
+This is used to evaluate a single expression against multiple possible values.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// If Statement
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> a &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">10&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (a &lt;span style="color:#f92672">&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>a&lt;span style="color:#e6db74"> is positive&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// If-Else Ladder
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> b &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (b &lt;span style="color:#f92672">&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>b&lt;span style="color:#e6db74"> is positive&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">else&lt;/span> &lt;span style="color:#66d9ef">if&lt;/span> (b &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>b&lt;span style="color:#e6db74"> is negative&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;&lt;/span>&lt;span style="color:#e6db74">$&lt;/span>b&lt;span style="color:#e6db74"> is neither positive nor negative&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Switch Statement
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> color &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;red&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">switch&lt;/span> (color) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#e6db74">&amp;#39;red&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;The color is red&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#e6db74">&amp;#39;green&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;The color is green&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#e6db74">&amp;#39;blue&amp;#39;&lt;/span>&lt;span style="color:#f92672">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;The color is blue&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">default&lt;/span>&lt;span style="color:#f92672">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;The color is not recognized&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="loops">Loops&lt;/h3>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>for loop&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A for loop is used to iterate over a range of values or a collection of elements. It has three parts: an initializer, a condition, and an updater. The loop runs as long as the condition is true, and the updater is executed after each iteration.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>while loop&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A while loop is used to repeatedly execute a block of code as long as a given condition is true. The condition is checked at the beginning of each iteration, and if it is false, the loop terminates.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>do-while loop&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A do-while loop is similar to a while loop, but the condition is checked at the end of each iteration instead of at the beginning. This means that the loop always executes at least once.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>forEach loop&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A forEach loop is used to iterate over the elements of a collection. It takes a function as an argument, and the function is executed for each element in the collection.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>for-in loop&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>A for-in loop is used to iterate over the elements of a collection. It automatically iterates over each element in the collection, without the need for an index variable.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// for loop (prints upto 5, including 5)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>; i &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>; i&lt;span style="color:#f92672">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;for loop iteration &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>i&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// while loop (prints upto 5, including 5)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> j &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">while&lt;/span> (j &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;while loop iteration &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>j&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> j&lt;span style="color:#f92672">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// do-while loop (prints upto 6, including 6)
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> k &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">do&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;do-while loop iteration &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>k&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> k&lt;span style="color:#f92672">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">while&lt;/span> (k &lt;span style="color:#f92672">&amp;lt;=&lt;/span> &lt;span style="color:#ae81ff">5&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// forEach loop
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> List&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> fruits &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#e6db74">&amp;#39;apple&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;banana&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;orange&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;kiwi&amp;#39;&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> fruits.forEach((fruit) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;I like &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>fruit&lt;span style="color:#e6db74">&amp;#39;&lt;/span>));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// for-in loop
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> List&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> fruits &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#e6db74">&amp;#39;apple&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;banana&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;orange&amp;#39;&lt;/span>, &lt;span style="color:#e6db74">&amp;#39;kiwi&amp;#39;&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">String&lt;/span> fruit &lt;span style="color:#66d9ef">in&lt;/span> fruits) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;I like &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>fruit&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="functions">Functions&lt;/h2>
+&lt;p>In Dart, functions are first-class objects, which means that they can be treated like any other object, such as numbers or strings. This allows functions to be assigned to variables, passed as arguments to other functions, and returned as values from functions.&lt;/p>
+&lt;h4 id="assign-function-to-a-variable">Assign function to a variable&lt;/h4>
+&lt;blockquote>
+&lt;p>In this example, we define a function add that takes two integer arguments and returns their sum. We then assign the function to a variable myFunc using the function name, without calling it with parentheses. We can then call the function using the variable myFunc, passing in the arguments as usual.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> add(&lt;span style="color:#66d9ef">int&lt;/span> a, &lt;span style="color:#66d9ef">int&lt;/span> b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> a &lt;span style="color:#f92672">+&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Assign the function to a variable
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> myFunc &lt;span style="color:#f92672">=&lt;/span> add;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Call the function through the variable
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(myFunc(&lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>)); &lt;span style="color:#75715e">// Output: 5
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="passing-a-function-as-an-argument-to-another-function">Passing a function as an argument to another function&lt;/h4>
+&lt;blockquote>
+&lt;p>In this example, we define a function applyFunction that takes another function as its first argument, along with two integer arguments. The function simply calls the passed function with the integer arguments and prints the result. We also define another function subtract that takes two integer arguments and returns their difference. We then call applyFunction with subtract as the first argument, along with 5 and 3 as the other two arguments.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function that takes another function as an argument
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> applyFunction(&lt;span style="color:#66d9ef">int&lt;/span> Function(&lt;span style="color:#66d9ef">int&lt;/span>, &lt;span style="color:#66d9ef">int&lt;/span>) func, &lt;span style="color:#66d9ef">int&lt;/span> a, &lt;span style="color:#66d9ef">int&lt;/span> b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(func(a, b));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function to pass as an argument
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> subtract(&lt;span style="color:#66d9ef">int&lt;/span> a, &lt;span style="color:#66d9ef">int&lt;/span> b) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> a &lt;span style="color:#f92672">-&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Call applyFunction with the subtract function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> applyFunction(subtract, &lt;span style="color:#ae81ff">5&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#75715e">// Output: 2
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="returning-a-function-from-another-function">Returning a function from another function&lt;/h4>
+&lt;blockquote>
+&lt;p>In this example, we define a function makeGreeter that takes a String argument name and returns another function that takes no arguments and prints a greeting message using the name. We then call makeGreeter with &amp;ldquo;Bob&amp;rdquo; as the argument, which returns a function that greets &amp;ldquo;Bob&amp;rdquo;. We store this function in a variable greetBob and then call it, which prints &amp;ldquo;Hello, Bob!&amp;rdquo; to the console.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function that returns a function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Function makeGreeter(&lt;span style="color:#66d9ef">String&lt;/span> name) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> () &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(&lt;span style="color:#e6db74">&amp;#34;Hello, &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>name&lt;span style="color:#e6db74">!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Call makeGreeter to get a function and store it in a variable
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> greetBob &lt;span style="color:#f92672">=&lt;/span> makeGreeter(&lt;span style="color:#e6db74">&amp;#34;Bob&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Call the returned function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> greetBob(); &lt;span style="color:#75715e">// Output: Hello, Bob!
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="arrow-function">Arrow Function&lt;/h3>
+&lt;p>The arrow function syntax is a shorthand way of defining a function in Dart. Instead of using the function keyword, we can define a function using an arrow (=&amp;gt;) after the function signature. The arrow function syntax is useful for defining short, one-line functions, and can make our code more concise and easier to read.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Arrow function syntax
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> multiply(&lt;span style="color:#66d9ef">int&lt;/span> a, &lt;span style="color:#66d9ef">int&lt;/span> b) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> a &lt;span style="color:#f92672">*&lt;/span> b;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Usage
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(multiply(&lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>)); &lt;span style="color:#75715e">// Output: 6
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="anonymous-function-lamda-functions">Anonymous Function (lamda functions)&lt;/h3>
+&lt;p>In Dart, an anonymous function is a function that is defined without a name. Instead of giving the function a name, we can assign it to a variable, which allows us to call the function by invoking the variable.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define an anonymous function and assign it to a variable
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> square &lt;span style="color:#f92672">=&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> x) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> x &lt;span style="color:#f92672">*&lt;/span> x;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> };
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Usage
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(square(&lt;span style="color:#ae81ff">2&lt;/span>)); &lt;span style="color:#75715e">// Output: 4
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Anonymous functions are useful for defining functions that are only used once, or for passing functions as arguments to other functions. For example, we can pass an anonymous function as an argument to the map method of a List object to apply the function to each element of the list.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> numbers &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>, &lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#ae81ff">5&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Use an anonymous function with the map method to square each element
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> squaredNumbers &lt;span style="color:#f92672">=&lt;/span> numbers.map((&lt;span style="color:#66d9ef">int&lt;/span> x) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> x &lt;span style="color:#f92672">*&lt;/span> x);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Output the squared numbers
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(squaredNumbers); &lt;span style="color:#75715e">// Output: (1, 4, 9, 16, 25)
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="class">Class&lt;/h2>
+&lt;p>In Dart, a class is a blueprint for creating objects that encapsulate data and behavior. It defines the attributes (or properties) and methods that are common to all objects created from that class.&lt;/p>
+&lt;p>You can mark some of the object&amp;rsquo;s data as private by prefixing it with an underscore (&amp;quot;_&amp;quot;). This means that it should only be accessed or changed from within the class, not from outside.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Attributes (or properties) that each object will have.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Private property, which can be only accessed through getters and setters
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> _address;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// A constructor initializes the attributes when an object is created.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Person(&lt;span style="color:#66d9ef">this&lt;/span>.name, &lt;span style="color:#66d9ef">this&lt;/span>.age);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Methods define the behavior that each object will have.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> sayHello() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;Hello, my name is &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>name&lt;span style="color:#e6db74"> and I&amp;#39;m &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>age&lt;span style="color:#e6db74"> years old.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You can create a new object from a class using the constructor
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Creating objects in Dart 2 no longer requires the use of the &amp;#34;new&amp;#34; keyword.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> john &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> Person(&lt;span style="color:#e6db74">&amp;#34;John&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">25&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You can access the object&amp;#39;s attributes and call its methods
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// using the dot notation.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(john.name); &lt;span style="color:#75715e">// Output: John
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> john.sayHello(); &lt;span style="color:#75715e">// Output: Hello, my name is John and I&amp;#39;m 25 years old.
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="abstract-class">Abstract Class&lt;/h3>
+&lt;p>An abstract class in Dart is a class that cannot be directly instantiated, but can be used as a base class for other classes. It can contain abstract methods, which are methods without an implementation, and concrete methods, which have a body.&lt;/p>
+&lt;p>An abstract class can define a common interface for a group of related classes, and can be used to enforce consistency among its subclasses. It can also be used to define a type that can be used to restrict function arguments.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// An abstract class is a class that cannot be instantiated directly,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// but can be used as a superclass.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">abstract&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Animal&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Abstract methods define method signatures without implementation.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> makeSound();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> eat() { &lt;span style="color:#75715e">// Concrete methods can also be defined in an abstract class.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#34;The animal is eating.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Subclasses of an abstract class must implement all abstract methods.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Cat&lt;/span> &lt;span style="color:#66d9ef">extends&lt;/span> Animal {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> makeSound() &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(&lt;span style="color:#e6db74">&amp;#34;Meow!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Dog&lt;/span> &lt;span style="color:#66d9ef">extends&lt;/span> Animal {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> makeSound() &lt;span style="color:#f92672">=&amp;gt;&lt;/span> print(&lt;span style="color:#e6db74">&amp;#34;Woof!&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You can also use an abstract class to define a type that can be used
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// to restrict function arguments.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> soundOff(Animal animal) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> animal.makeSound();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You cannot create an instance of an abstract class directly,
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// but you can create instances of its subclasses.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> cat &lt;span style="color:#f92672">=&lt;/span> Cat();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> dog &lt;span style="color:#f92672">=&lt;/span> Dog();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You can call methods on the objects as usual, and pass them to functions
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// that take the abstract class as a parameter.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> cat.makeSound(); &lt;span style="color:#75715e">// Output: Meow!
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> dog.makeSound(); &lt;span style="color:#75715e">// Output: Woof!
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> soundOff(cat); &lt;span style="color:#75715e">// Output: Meow!
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> soundOff(dog); &lt;span style="color:#75715e">// Output: Woof!
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="getters-and-setters">Getters and Setters&lt;/h3>
+&lt;p>In Dart, getters and setters are special methods that allow you to control access to an object&amp;rsquo;s properties. Getters retrieve the current value of a property, while setters change the value of a property.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Private attributes can only be accessed through getters and setters.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> _name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> _age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Getters retrieve the current value of an attribute.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> &lt;span style="color:#66d9ef">get&lt;/span> name &lt;span style="color:#f92672">=&amp;gt;&lt;/span> _name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#66d9ef">get&lt;/span> age &lt;span style="color:#f92672">=&amp;gt;&lt;/span> _age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Setters change the value of an attribute, with optional validation logic.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">set&lt;/span> name(&lt;span style="color:#66d9ef">String&lt;/span> value) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> _name &lt;span style="color:#f92672">=&lt;/span> value;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">set&lt;/span> age(&lt;span style="color:#66d9ef">int&lt;/span> value) &lt;span style="color:#f92672">=&amp;gt;&lt;/span> _age &lt;span style="color:#f92672">=&lt;/span> value &lt;span style="color:#f92672">&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#f92672">?&lt;/span> value &lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Person(&lt;span style="color:#66d9ef">this&lt;/span>._name, &lt;span style="color:#66d9ef">this&lt;/span>._age);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// You can use getters and setters to control access to an object&amp;#39;s properties.
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> john &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">new&lt;/span> Person(&lt;span style="color:#e6db74">&amp;#34;John&amp;#34;&lt;/span>, &lt;span style="color:#ae81ff">25&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(john.name); &lt;span style="color:#75715e">// Output: John
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> john.age &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">10&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(john.age); &lt;span style="color:#75715e">// Output: 0
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="interfaces">Interfaces&lt;/h2>
+&lt;p>In Dart, an interface is a contract that defines a set of method signatures that a class must implement. An interface only specifies the method signatures, not their implementation. A class that implements an interface must provide an implementation for all the methods declared in the interface.&lt;/p>
+&lt;blockquote>
+&lt;p>In below example, Vehicle, defines two methods that a class must implement: start() and stop(). Any class that implements this interface must provide its own implementation for these methods.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define an interface
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">abstract&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Vehicle&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> start();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> stop();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Implement the interface
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Car&lt;/span> &lt;span style="color:#66d9ef">implements&lt;/span> Vehicle {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> start() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Starting the car&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#960050;background-color:#1e0010">@&lt;/span>override
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> stop() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Stopping the car&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="exceptions">Exceptions&lt;/h2>
+&lt;p>In Dart, exceptions are a way to handle runtime errors and abnormal conditions that occur during program execution. An exception is an object that represents an error that occurred during the execution of a program.&lt;/p>
+&lt;blockquote>
+&lt;p>The try block is used to enclose the code that might throw an exception. The catch block is used to handle the exception if it is thrown. The on keyword is used to specify the type of exception to catch. The finally block is used to specify code that should be executed regardless of whether an exception was thrown or not.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> result &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">12&lt;/span> &lt;span style="color:#f92672">~/&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#75715e">// This line will throw an exception
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> } on IntegerDivisionByZeroException {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Cannot divide by zero&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">catch&lt;/span> (e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;An exception occurred: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>e&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">finally&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;This code will always be executed&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="throw-exceptions">Throw Exceptions&lt;/h3>
+&lt;p>In Dart, you can throw or raise an exception using the throw keyword. You can throw any object as an exception. Typically, you would throw an object that extends the Exception class or one of its subclasses, such as FormatException, ArgumentError, or RangeError.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> validateAge(&lt;span style="color:#66d9ef">int&lt;/span> age) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (age &lt;span style="color:#f92672">&amp;lt;&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#f92672">||&lt;/span> age &lt;span style="color:#f92672">&amp;gt;&lt;/span> &lt;span style="color:#ae81ff">120&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">throw&lt;/span> ArgumentError(&lt;span style="color:#e6db74">&amp;#39;Invalid age: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>age&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> validateAge(&lt;span style="color:#ae81ff">150&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">catch&lt;/span> (e) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;An exception occurred: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>e&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// An exception occurred: Invalid age: 150
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="futures">Futures&lt;/h2>
+&lt;p>Futures represent a value that may not be available yet but will be available at some point in the future. They are often used in asynchronous programming, where the application needs to perform some long-running task, such as a network request or file I/O, without blocking the main thread. Instead of waiting for the task to complete before moving on, the application can create a Future object to represent the task and continue executing other code. When the task is finished, the Future object is updated with the result.&lt;/p>
+&lt;blockquote>
+&lt;p>In this example, we use the http package to send a GET request to the API endpoint and fetch the username. We then use async/await to wait for the username to be fetched before printing it. If an error occurs while fetching the username, we handle it using a try/catch block and print an error message.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;dart:async&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;dart:convert&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">import&lt;/span> &lt;span style="color:#e6db74">&amp;#39;package:http/http.dart&amp;#39;&lt;/span> &lt;span style="color:#66d9ef">as&lt;/span> http;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define the URL for the API endpoint
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">const&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> apiEndpoint &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;https://example.com/api/user&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function to fetch the username from the API and return a Future
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Future&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">String&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> fetchUsername() &lt;span style="color:#66d9ef">async&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Send a GET request to the API endpoint
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> response &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">await&lt;/span> http.&lt;span style="color:#66d9ef">get&lt;/span>(Uri.parse(apiEndpoint));
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (response.statusCode &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#ae81ff">200&lt;/span>) { &lt;span style="color:#75715e">// If the response is successful
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">final&lt;/span> json &lt;span style="color:#f92672">=&lt;/span> jsonDecode(response.body); &lt;span style="color:#75715e">// Parse the JSON response
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">return&lt;/span> json[&lt;span style="color:#e6db74">&amp;#39;username&amp;#39;&lt;/span>]; &lt;span style="color:#75715e">// Return the username
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> } &lt;span style="color:#66d9ef">else&lt;/span> { &lt;span style="color:#75715e">// If the response is not successful
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">throw&lt;/span> Exception(&lt;span style="color:#e6db74">&amp;#39;Failed to fetch username&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Throw an exception
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Define a function to print the username using async/await
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> Future&lt;span style="color:#f92672">&amp;lt;&lt;/span>&lt;span style="color:#66d9ef">void&lt;/span>&lt;span style="color:#f92672">&amp;gt;&lt;/span> printUsername() &lt;span style="color:#66d9ef">async&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">try&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">final&lt;/span> username &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#66d9ef">await&lt;/span> fetchUsername(); &lt;span style="color:#75715e">// Wait for the username to be fetched
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;The username is &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>username&lt;span style="color:#e6db74">&amp;#39;&lt;/span>); &lt;span style="color:#75715e">// Print the username
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> } &lt;span style="color:#66d9ef">catch&lt;/span> (e) { &lt;span style="color:#75715e">// Handle any errors that occur while fetching the username
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;Error fetching username: &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>e&lt;span style="color:#e6db74">&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;Fetching username...&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> printUsername(); &lt;span style="color:#75715e">// Call the printUsername() function
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Print a message indicating that we&amp;#39;re waiting for the username
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> print(&lt;span style="color:#e6db74">&amp;#39;Waiting for the username to be fetched...&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="miscellaneous">Miscellaneous&lt;/h2>
+&lt;h3 id="null-and-null-aware">Null and Null aware&lt;/h3>
+&lt;p>In Dart, null is a special value that represents the absence of a value. When a variable is assigned null, it means that the variable doesn&amp;rsquo;t currently have a value.&lt;/p>
+&lt;p>The null-aware operator in Dart is a shorthand way of checking whether an object is null before accessing its properties or calling its methods. There are two types of null-aware operators&lt;/p>
+&lt;h4 id="1-the--operator">&lt;strong>1. The ?. operator&lt;/strong>&lt;/h4>
+&lt;p>This operator is used to safely access properties and methods of an object that might be null. If the object is null, the expression will short-circuit and return null, without attempting to access the property or call the method.&lt;/p>
+&lt;blockquote>
+&lt;p>If the person object is null, the name variable will be assigned null without throwing a NullPointerException.&lt;/p>
+&lt;/blockquote>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">String&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Person person;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// name variable will be null instead of raising a NullPointerException
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> name &lt;span style="color:#f92672">=&lt;/span> person&lt;span style="color:#f92672">?&lt;/span>.name;
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="2-the--operator">&lt;strong>2. The ?? operator&lt;/strong>&lt;/h4>
+&lt;p>This operator is used to provide a default value if the expression to the left of the operator is null. If the expression is not null, the operator returns its value.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> getUserAge() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// some logic to retrieve the user&amp;#39;s age
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#66d9ef">null&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> age &lt;span style="color:#f92672">=&lt;/span> getUserAge() &lt;span style="color:#f92672">??&lt;/span> &lt;span style="color:#ae81ff">18&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#39;The user is &lt;/span>&lt;span style="color:#e6db74">${&lt;/span>age&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74"> years old.&amp;#39;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="ternary-operator">Ternary Operator&lt;/h3>
+&lt;p>The ternary operator is a shorthand way of writing an if-else statement in Dart.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// traditional approach using if-else
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> age &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">25&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">String&lt;/span> status;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> (age &lt;span style="color:#f92672">&amp;gt;=&lt;/span> &lt;span style="color:#ae81ff">18&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> status &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Adult&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> } &lt;span style="color:#66d9ef">else&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> status &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Minor&amp;#39;&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Ternary Operator
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#75715e">// Syntaxt : condition ? true : false
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">String&lt;/span> result &lt;span style="color:#f92672">=&lt;/span> age &lt;span style="color:#f92672">&amp;gt;=&lt;/span> &lt;span style="color:#ae81ff">18&lt;/span> &lt;span style="color:#f92672">?&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Adult&amp;#39;&lt;/span> &lt;span style="color:#f92672">:&lt;/span> &lt;span style="color:#e6db74">&amp;#39;Minor&amp;#39;&lt;/span>; &lt;span style="color:#75715e">// Adult
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(status);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(result);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="spread-operator">Spread Operator&lt;/h3>
+&lt;p>In Dart, the spread operator (&amp;hellip;) is used to &amp;ldquo;spread&amp;rdquo; the elements of a collection into another collection. The spread operator can be used with lists, sets, and maps.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> list1 &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> list2 &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">4&lt;/span>, &lt;span style="color:#ae81ff">5&lt;/span>, &lt;span style="color:#ae81ff">6&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> combinedList &lt;span style="color:#f92672">=&lt;/span> [...list1, ...list2];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(combinedList); &lt;span style="color:#75715e">// Output: [1, 2, 3, 4, 5, 6]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// Can also combine with other values
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> &lt;span style="color:#66d9ef">var&lt;/span> combinedList &lt;span style="color:#f92672">=&lt;/span> [&lt;span style="color:#ae81ff">0&lt;/span>, ...list1, ...list2, &lt;span style="color:#ae81ff">7&lt;/span>, &lt;span style="color:#ae81ff">8&lt;/span>, &lt;span style="color:#ae81ff">9&lt;/span>];
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(combinedList); &lt;span style="color:#75715e">// Output: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+&lt;/span>&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">&lt;/span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="cascade-notation">Cascade Notation&lt;/h3>
+&lt;p>Cascade notation is a feature in Dart that allows you to perform a sequence of operations on an object by chaining them together using the &amp;ldquo;..&amp;rdquo; operator. This operator is also known as the cascade operator.&lt;/p>
+&lt;p>The cascade notation is particularly useful when you want to perform multiple operations on the same object. Instead of creating temporary variables or repeatedly referencing the same object, you can use cascade notation to chain the operations together.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-dart" data-lang="dart">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">String&lt;/span> name;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">int&lt;/span> age;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> introduce() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> print(&lt;span style="color:#e6db74">&amp;#34;Hello, my name is &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>name&lt;span style="color:#e6db74"> and I am &lt;/span>&lt;span style="color:#e6db74">$&lt;/span>age&lt;span style="color:#e6db74"> years old.&amp;#34;&lt;/span>);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">void&lt;/span> main() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> person &lt;span style="color:#f92672">=&lt;/span> Person()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ..name &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#e6db74">&amp;#34;John&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ..age &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">30&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ..introduce();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;hr>
+&lt;h3 id="references">References&lt;/h3>
+&lt;ul>
+&lt;li>&lt;strong>&lt;a href="https://quickref.me/dart">https://quickref.me/dart&lt;/a>&lt;/strong>&lt;/li>
+&lt;/ul></content></item></channel></rss>

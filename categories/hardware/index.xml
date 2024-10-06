@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hardware on Favas M</title>
+    <link>http://localhost:1313/categories/hardware/</link>
+    <description>Recent content in Hardware on Favas M</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 05 Oct 2024 16:25:54 +0530</lastBuildDate><atom:link href="http://localhost:1313/categories/hardware/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Photon Lockdown Walkthrough - HackTheBox</title>
+      <link>http://localhost:1313/blogs/hackthebox/challenges/hardware/photon-lockdown/</link>
+      <pubDate>Sat, 05 Oct 2024 16:25:54 +0530</pubDate>
+      
+      <guid>http://localhost:1313/blogs/hackthebox/challenges/hardware/photon-lockdown/</guid>
+      <description>&lt;p&gt;In this article, I’ll walk you through solving the &lt;strong&gt;Photon Lockdown&lt;/strong&gt; hardware challenge from the platform &lt;a href=&#34;https://hackthebox.eu&#34;&gt;HackTheBox&lt;/a&gt;.&lt;/p&gt;</description>
+      <content>&lt;p&gt;In this article, I’ll walk you through solving the &lt;strong&gt;Photon Lockdown&lt;/strong&gt; hardware challenge from the platform &lt;a href=&#34;https://hackthebox.eu&#34;&gt;HackTheBox&lt;/a&gt;.&lt;/p&gt;
+</content>
+    </item>
+    
+  </channel>
+</rss>

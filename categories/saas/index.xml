@@ -88,9 +88,9 @@
 &lt;p>Now this project structure will seem a bit redundant or strange for some of the Go developers. This is how I generally build projects in Golang. Since this is not a blog about how to build API servers in Golang, I will not dwell deep into the structure; I will explain as much as I can of each package and file&amp;rsquo;s purposes as we progress.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── middleware.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── middlewares
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── auth.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── middleware.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── router.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── app
@@ -98,13 +98,11 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── migrate
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── db
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── db.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── migrations
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── public
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── 00001_init_public_schema.sql
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── tenant
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── 00001_init_tenant_schema.sql
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── migrations.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── queries
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── public
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   ├── public_files.sql
@@ -121,21 +119,16 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── tenants.sql.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── user_lookup.sql.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── users.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── db.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── migrations.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tenant.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docker-compose.yml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docs
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── Go Multitenancy.postman_collection.json
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── handlers
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── auth_service
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── login.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── register.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── healthcheck.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tenant_service
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── get_tenant.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── main
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── tenant_service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── get_tenant.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── healthcheck.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── pkg
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── helpers
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── json.go
@@ -143,14 +136,17 @@
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── password.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── response.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── utils.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── README.md
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── server
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── server.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── sqlc.yml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── tmp
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── build-errors.log
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">22&lt;/span> directories, &lt;span style="color:#ae81ff">41&lt;/span> files
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .air.toml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docker-compose.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .env.example
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .gitignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── README.md
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── sqlc.yml
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here’s a simple proof of concept I built using Go Chi, PostgreSQL, SQLC, and Goose.&lt;/p>
 &lt;p>&lt;strong>Disclaimer:&lt;/strong>&lt;br>
 This code is intended purely as a demonstration of multi-tenancy concepts and is not production-ready. To keep the implementation straightforward, many best practices and security measures have been intentionally omitted. For example:&lt;/p>

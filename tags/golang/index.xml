@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Golang on Favas M</title><link>https://favas.dev/tags/golang/</link><description>Recent content in Golang on Favas M</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sat, 21 Sep 2024 16:25:54 +0530</lastBuildDate><atom:link href="https://favas.dev/tags/golang/index.xml" rel="self" type="application/rss+xml"/><item><title>Multitenancy Using Golang (WIP)</title><link>https://favas.dev/blogs/programming/multitenancy_in_golang/</link><pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate><guid>https://favas.dev/blogs/programming/multitenancy_in_golang/</guid><description>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p></description><content>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Golang on Favas M</title><link>https://favas.dev/tags/golang/</link><description>Recent content in Golang on Favas M</description><generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sat, 21 Sep 2024 16:25:54 +0530</lastBuildDate><atom:link href="https://favas.dev/tags/golang/index.xml" rel="self" type="application/rss+xml"/><item><title>Multitenancy Using Golang</title><link>https://favas.dev/blogs/programming/multitenancy_in_golang/</link><pubDate>Sat, 21 Sep 2024 16:25:54 +0530</pubDate><guid>https://favas.dev/blogs/programming/multitenancy_in_golang/</guid><description>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p></description><content>&lt;p>Hello! In this article, I will explain how to build a multi-tenant system in Golang. Before we dive in, I&amp;rsquo;d like to mention that this is my first blog post, so there may be some mistakes or areas lacking clarity. The content is based on my experience building a multi-tenant system in Golang at work. If there&amp;rsquo;s a better way to approach this or potential drawbacks in the method described, I&amp;rsquo;d appreciate your feedback.&lt;/p>
 &lt;p>Keep in mind that I haven&amp;rsquo;t tested this system in a high-traffic production environment, so it may have performance limitations. Please adapt the approach to your specific needs and use cases.&lt;/p>
 &lt;h3 id="tldr">TL;DR:&lt;/h3>
 &lt;p>This post shares my experience building a multi-tenant system in Golang. The example code is meant to illustrate the concept and might have unhandled exceptions or security vulnerabilities. Make sure to thoroughly review and test the code before deploying it in a production environment.&lt;/p>
@@ -88,35 +88,76 @@
 &lt;p>Now this project structure will seem a bit redundant or strange for some of the Go developers. This is how I generally build projects in Golang. Since this is not a blog about how to build API servers in Golang, I will not dwell deep into the structure; I will explain as much as I can of each package and file&amp;rsquo;s purposes as we progress.&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>.
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── api
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── middlewares
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── middlewares.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── router.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── middleware.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── middlewares
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── auth.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── router.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── cmd
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── app
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── main.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── migrate
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── helpers.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── main.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── app
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── main.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── migrate
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── main.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── db
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── migrations
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ ├── shared
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ │ └── 00001_init_db.sql
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── tenant
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── 00001_init_db.sql
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── queries
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ ├── shared
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ │ └── tenant.sql
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── tenant
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── user.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── db.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── migrations
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── public
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── 00001_init_public_schema.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── tenant
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── 00001_init_tenant_schema.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── migrations.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── queries
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── public
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   ├── public_files.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   ├── tenants.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   │   └── user_lookup.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── tenant
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── tenant_files.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── users.sql
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── sqlc
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── db.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── models.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── public_files.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── tenant_files.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── tenants.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── user_lookup.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── users.sql.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tenant.go
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docker-compose.yml
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .env
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .env.example
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── .gitignore
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── docs
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── Go Multitenancy.postman_collection.json
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.mod
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── go.sum
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── handlers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── auth_service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   ├── login.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   │   └── register.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── healthcheck.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── tenant_service
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── get_tenant.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── main
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── Makefile
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── pkg
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── helpers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── helpers
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── json.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── jwt.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── password.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   ├── response.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── utils.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── README.md
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── server
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│ └── server.go
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── sqlc.yml
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div></content></item></channel></rss>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>│   └── server.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>├── sqlc.yml
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>└── tmp
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> └── build-errors.log
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#ae81ff">22&lt;/span> directories, &lt;span style="color:#ae81ff">41&lt;/span> files
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Here’s a simple proof of concept I built using Go Chi, PostgreSQL, SQLC, and Goose.&lt;/p>
+&lt;p>&lt;strong>Disclaimer:&lt;/strong>&lt;br>
+This code is intended purely as a demonstration of multi-tenancy concepts and is not production-ready. To keep the implementation straightforward, many best practices and security measures have been intentionally omitted. For example:&lt;/p>
+&lt;ul>
+&lt;li>Errors are not properly handled.&lt;/li>
+&lt;li>User inputs are not validated.&lt;/li>
+&lt;li>Security measures are insufficiently implemented.&lt;/li>
+&lt;/ul>
+&lt;p>Please use this codebase only as a reference or for learning purposes.&lt;br>
+&lt;strong>Reference:&lt;/strong> &lt;a href="https://github.com/clevrf0x/go-multitenancy">https://github.com/clevrf0x/go-multitenancy&lt;/a>&lt;/p></content></item></channel></rss>
